@@ -1,9 +1,11 @@
 import requests
 import numpy as np
 import pandas as pd
+import openpyxl
 
 #GOAL: START SIMPLE. SIMPLY PULL AVERAGE DATA FROM MY PROFILE.
 # MAYBE CALCULATE MY LANING SKILL ISSUE, GOLD AT 10MIN AND STOP BLAMING TEAM
+
 
 Api_Stratz_Url = "https://api.stratz.com/graphql"
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJTdWJqZWN0IjoiZmRmNjcwYjEtYThhOS00NjM1LTk0ZjktZjBmYTVjZDkzZjU5IiwiU3RlYW1JZCI6IjQwNTc4ODU0MCIsIm5iZiI6MTcwMDM2ODc1NCwiZXhwIjoxNzMxOTA0NzU0LCJpYXQiOjE3MDAzNjg3NTQsImlzcyI6Imh0dHBzOi8vYXBpLnN0cmF0ei5jb20ifQ.RRtK4zwNqnp7EPda-BkBNI08hAlAw5OqqbY9RrzkFNs"
@@ -62,39 +64,37 @@ def query_matches(take,skips,steamID,position):
 
 
 def adding_columns(df_raw,steamID,minute):
-    df_calculated_data = [df_raw["id"],df_raw["playerSlot"],df_raw["position"],df_raw["heroId"]] #adds important raw data to calculated
-    df_calculated = pd.DataFrame(df_calculated_data)
+    importantRawColumns = ["id","playerSlot","position","heroId"]
+    df_calculated = df_raw[importantRawColumns].copy()
     df_calculated["networthDifference"] = 0
     df_calculated["lasthitAverage"] = 0
-    print(df_calculated)
 
     for match_id in df_raw["id"].unique():
         
-        def isOnMyTeamColumn(df,match_id,steamID): #for some reason these parameters arent needed inside this adding_columns function? like code works perfectly fine if u delete the parameters, ig cus parameters already gotten
-            radiant = df.loc[(df["steamAccountId"]==steamID) & (df["id"]==match_id),"isRadiant"].values[0]
+        def isOnMyTeamColumn(df_raw,match_id,steamID): #for some reason these parameters arent needed inside this adding_columns function? like code works perfectly fine if u delete the parameters, ig cus parameters already gotten
+            radiant = df_raw.loc[(df_raw["steamAccountId"]==steamID) & (df_raw["id"]==match_id),"isRadiant"].values[0]
             if radiant == True:
-                df.loc[df["id"] == match_id,"isOnMyTeam"] = df["isRadiant"]
+                df_raw.loc[df_raw["id"] == match_id,"isOnMyTeam"] = df_raw["isRadiant"]
             else:
-                df.loc[df["id"] == match_id,"isOnMyTeam"] = ~df["isRadiant"]
+                df_raw.loc[df_raw["id"] == match_id,"isOnMyTeam"] = ~df_raw["isRadiant"]
 
         isOnMyTeamColumn(df_raw,match_id,steamID)
 
         #first df is df_raw, second df is df_calculated 
-        def networthDifferenceColumn(df,df_calculated,match_id,minute): #for each position, finds the difference of MyPosNW - TheirPosNW and then adds it the column in the order of pos1,pos2,po3,pos4,pos5. Will ALWAYS be perspective of ally - enemy.
+        def networthDifferenceColumn(df_raw,df_calculated,match_id,minute): #for each position, finds the difference of MyPosNW - TheirPosNW and then adds it the column in the order of pos1,pos2,po3,pos4,pos5. Will ALWAYS be perspective of ally - enemy.
             position_ally = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",        "POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5"]
             position_enemy = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",       "POSITION_3","POSITION_2","POSITION_1","POSITION_5","POSITION_4"]
             for i,pos in enumerate(position_ally):
-                MyPosNetWorth = df.loc[(df["position"] == position_ally[i]) & (df["isOnMyTeam"] ==  True) & (df["id"] == match_id), "stats.networthPerMinute"].values[0]
-                TheirPosNetWorth = df.loc[(df["position"] == position_enemy[i]) & (df["isOnMyTeam"] ==  False) & (df["id"] == match_id), "stats.networthPerMinute"].values[0]
-                if (MyPosNetWorth is not None) and (TheirPosNetWorth is not None) and (len(MyPosNetWorth) > minute):
+                MyPosNetWorth = df_raw.loc[(df_raw["position"] == position_ally[i]) & (df_raw["isOnMyTeam"] ==  True) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
+                TheirPosNetWorth = df_raw.loc[(df_raw["position"] == position_enemy[i]) & (df_raw["isOnMyTeam"] ==  False) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
+                if (MyPosNetWorth is not None) and (TheirPosNetWorth is not None) and (len(MyPosNetWorth) > minute): #does all the finding and math in df_raw and variables, then slaps it into df_calculated
                     PosDiff = MyPosNetWorth[minute] - TheirPosNetWorth[minute]
                     df_calculated.loc[(df_calculated["id"] == match_id) & (df_calculated.index % 10 == i), "networthDifference"] += PosDiff #able to put it order of pos1,pos2 cus it matches to the index%10=i
-            return df
 
         networthDifferenceColumn(df_raw,df_calculated,match_id,minute) 
 
-        def statsSumColumn(df,df_calculated,match_id,minute,columnLabel): #stats, can be used for lasthits and denies. returns total sum of stats list at [minute]
-            for i,row in df[df["id"] == match_id].iterrows():
+        def statsSumColumn(df_raw,df_calculated,match_id,minute,columnLabel): #stats, can be used for lasthits and denies. returns total sum of stats list at [minute]
+            for i,row in df_raw[df_raw["id"] == match_id].iterrows():
                 statRow = row["stats." + columnLabel]
                 if (statRow is not None) and (len(statRow) > (minute-1)): #minute-1 cus unlike networthPerMinute list, lasthit list starts from min 1 
                     statSum = sum(statRow[:(minute-1)])
@@ -105,7 +105,7 @@ def adding_columns(df_raw,steamID,minute):
 
     return df_calculated #finishes for loop
 
-def calculate(df):
+def calculate(df_calculated):
     nw_dict = {
         1:"" ,
         2:"" ,
@@ -120,9 +120,9 @@ def calculate(df):
         10:"" ,#10 is 5-4
     }
     for x in range(1,11):
-        every_networth_comparison = df["networthDifference"].iloc[x-1::10]
+        every_networth_comparison = df_calculated["networthDifference"].iloc[x-1::10]
         networth_comparison_average = every_networth_comparison.mean()
-        nw_dict[x] = networth_comparison_average
+        nw_dict[x] = (networth_comparison_average).item() #.item() turns np.float64() into native float
 
     return nw_dict
 
@@ -140,6 +140,7 @@ def skip_calculator(numberOfMatchesToParse): #given input as an interval of 100 
     
 
 steamID = 405788540
+
 #steamID = 171262902 #watson
 #steamID = 108203659 #Rusy's steam ID
 #steamID = 898455820 #malrine
@@ -159,11 +160,15 @@ for skip in skips: #does the querying each time for skip
 
 
 print(df_raw)
+with open("df_raw.xlsx","w") as df_raw_file:
+    df_raw.to_excel("df_raw.xlsx")
+
+
 df_calculated = (adding_columns(df_raw,steamID,minute)) #this function turns df_raw into df_calculated
 print(df_calculated)
 
-#final_calculations = calculate(df_calculated)
-#print(final_calculations)
+final_calculations = calculate(df_calculated)
+print(final_calculations)
 
 #look at how the reddit guy used skips (for loop to query multiple times) and use that to get larger sample size
 #future implementatons: query usage counter and limit, added columns for xp, wins, cs, denies..., graph the data and wins/winrate, and calculate average numbers for live/highmmr games

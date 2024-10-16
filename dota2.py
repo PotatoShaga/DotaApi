@@ -112,31 +112,51 @@ def adding_columns(df_raw,steam_id,minute):
                 level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
                 df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
 
-        
         levels_column(df_raw,df_calculated,match_id,minute) #this is broken, probably not enough specificiers on where to put data. itterows would just use i, but im tryna use vectorization
+
+    df_calculated["isOnMyTeam"] = df_raw["isOnMyTeam"]
 
     return df_calculated #finishes for loop
 
 def player_calculations(df_calculated):
-    nw_dict = {
-        1:"" ,
-        2:"" ,
-        3:"" ,
-        4:"" ,
-        5:"" ,
+    player_calculations_list = [{}] #final output is list of one dict, so df is all on row 0. add by expanding list[0]["key"]=value
+    def networth_difference(df_calculated):
+        nw_dict = {
+            1:"" ,
+            2:"" ,
+            3:"" ,
+            4:"" ,
+            5:"" ,
 
-        6:"" , #6 is 1-3
-        7:"" , #7 is 2-2
-        8:"" , #8 is 3-1
-        9:"" , #9 is 4-5
-        10:"" ,#10 is 5-4
-    }
-    for x in range(1,11):
-        every_networth_comparison = df_calculated["networthDifference"].iloc[x-1::10]
-        networth_comparison_average = every_networth_comparison.mean()
-        nw_dict[x] = (networth_comparison_average).item() #.item() turns np.float64() into native float
+            6:"" , #6 is 1-3
+            7:"" , #7 is 2-2
+            8:"" , #8 is 3-1
+            9:"" , #9 is 4-5
+            10:"" ,#10 is 5-4
+        }
+        for x in range(1,11):
+            every_networth_comparison = df_calculated["networthDifference"].iloc[x-1::10]
+            networth_comparison_average = every_networth_comparison.mean()
+            nw_dict[x] = (networth_comparison_average).item() #.item() turns np.float64() into native float
+        player_calculations_list[0]["networth_difference"] = nw_dict
+    
+    def averages(df_calculated,position,isOnMyTeam,sum_label,dict_key):
+        row_data = df_calculated.loc[(df_calculated["position"] == position) & (df_calculated["isOnMyTeam"] == isOnMyTeam)]
+        df_sum = row_data[sum_label]
+        sum = df_sum.mean() #takes the df of every match's sum and averages all the matches
+        player_calculations_list[0][dict_key] = sum 
 
-    return nw_dict
+        
+    #for match_id in df_calculated["id"].unique():
+        
+    networth_difference(df_calculated)
+    averages(df_calculated,position,True,"lastHitsPerMinuteSum","lastHitsAverage")
+    averages(df_calculated,position,True,"deniesPerMinuteSum","deniesAverage")
+    averages(df_calculated,position,True,"level","levelAverage")
+
+
+    df_player_calculations = pd.DataFrame(player_calculations_list)
+    return df_player_calculations
 
 def skip_calculator(number_of_matches_to_parse): #given input as an interval of 100 (like 300), outputs the skips list [0,100,200] for the api functions to iterate over. WHAT IF I WANT <100 for TESTING??
     if number_of_matches_to_parse <= 100:
@@ -163,29 +183,33 @@ position = "POSITION_1"
 "========================================================"
 duration = 20
 minute = 11 #minute 11 is exactly 10:01
-number_of_matches_to_parse = 10 #accepts numbers 0-100, for numbers above it needs to be intervals of 100
+number_of_matches_to_parse = 100 #accepts numbers 0-100, for numbers above it needs to be intervals of 100
 "========================================================"
 
 responses = []
 take, skips = skip_calculator(number_of_matches_to_parse)
+
 for skip in skips: #does the querying each time for skip
     response = query_matches(take,skip,steam_id,position)
     responses.extend(response)
     df_raw = pd.json_normalize(responses,"players",["id"])
 
+def make_excel_sheets(df,sheet_name):
+    file_name = sheet_name + ".xlsx"
+    with open(file_name,"w") as df_file:
+        df.to_excel(file_name)
+
 
 print(df_raw)
-def make_excel_sheets(df_raw):
-    with open("df_raw.xlsx","w") as df_raw_file:
-        df_raw.to_excel("df_raw.xlsx")
-
-#make_excel_sheets(df_raw)
 
 df_calculated = (adding_columns(df_raw,steam_id,minute)) #this function turns df_raw into df_calculated
 print(df_calculated)
 
-personal_calculations = player_calculations(df_calculated)
-print(personal_calculations)
+df_player_calculations = player_calculations(df_calculated)
+print(df_player_calculations)
+
+#make_excel_sheets(df_raw,"raw_data")
+make_excel_sheets(df_player_calculations,"player_calculations")
 
 #look at how the reddit guy used skips (for loop to query multiple times) and use that to get larger sample size
 #future implementatons: query usage counter and limit, added columns for xp, wins, cs, denies..., graph the data and wins/winrate, and calculate average numbers for live/highmmr games

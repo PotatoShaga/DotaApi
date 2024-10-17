@@ -107,12 +107,14 @@ def adding_columns(df_raw,steam_id,minute):
             seconds = (minute-1) * 60
             for i,row in df_raw[df_raw["id"] == match_id].iterrows(): #this function similar to stats_sum_column, this itterates over each batch of id=match_id (which is unique 10 rows (10players per unique match))
                 levelup_row = row["playbackData.playerUpdateLevelEvents"] #gets the specific cell data by the name, "playbackdata.."
+                print(levelup_row)
+                print(match_id)
                 levelup_df = pd.DataFrame(levelup_row) #turns the cell data, a list of dicts, into df for easier computation
                 df_filtered = levelup_df[levelup_df["time"]<=seconds]
                 level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
                 df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
 
-        levels_column(df_raw,df_calculated,match_id,minute) #this is broken, probably not enough specificiers on where to put data. itterows would just use i, but im tryna use vectorization
+        ###levels_column(df_raw,df_calculated,match_id,minute) #this is broken, probably not enough specificiers on where to put data. itterows would just use i, but im tryna use vectorization
 
     df_calculated["isOnMyTeam"] = df_raw["isOnMyTeam"]
 
@@ -147,27 +149,25 @@ def player_calculations(df_calculated):
         player_calculations_list[0][dict_key] = sum 
 
         
-    #for match_id in df_calculated["id"].unique():
-        
     networth_difference(df_calculated)
     averages(df_calculated,position,True,"lastHitsPerMinuteSum","lastHitsAverage")
     averages(df_calculated,position,True,"deniesPerMinuteSum","deniesAverage")
-    averages(df_calculated,position,True,"level","levelAverage")
+    ###averages(df_calculated,position,True,"level","levelAverage")
 
 
     df_player_calculations = pd.DataFrame(player_calculations_list)
     return df_player_calculations
 
-def skip_calculator(number_of_matches_to_parse): #given input as an interval of 100 (like 300), outputs the skips list [0,100,200] for the api functions to iterate over. WHAT IF I WANT <100 for TESTING??
-    if number_of_matches_to_parse <= 100:
+def skip_calculator(number_of_matches_to_parse,skip_interval): 
+    if number_of_matches_to_parse <= skip_interval:
         take = number_of_matches_to_parse
         skips = [0]
     else:
-        take = 100
+        take = skip_interval
         skips = []
-        intervals = number_of_matches_to_parse / 100
+        intervals = number_of_matches_to_parse / skip_interval
         for x in range(int(intervals)):
-            skips.append(x*100)
+            skips.append(x*skip_interval)
     return (take, skips)
     
 
@@ -179,20 +179,31 @@ steam_id = 405788540
 #steam_id = 183719386 #atf
 #holy fuck nisha and malrine both have +750g and +650g respectively, all other team members are statistically insignificant (+/- 100) or BURDENSOME (-200 pos1 for malrine), probably due to malrine's high rank.
 position = "POSITION_1"
-
 "========================================================"
 duration = 20
-minute = 11 #minute 11 is exactly 10:01
-number_of_matches_to_parse = 100 #accepts numbers 0-100, for numbers above it needs to be intervals of 100
+minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
+skip_interval = 100
+number_of_matches_to_parse = 500 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 responses = []
-take, skips = skip_calculator(number_of_matches_to_parse)
-
+responses_batch = []
+take, skips = skip_calculator(number_of_matches_to_parse,skip_interval)
+print(take,skips)
 for skip in skips: #does the querying each time for skip
-    response = query_matches(take,skip,steam_id,position)
-    responses.extend(response)
-    df_raw = pd.json_normalize(responses,"players",["id"])
+    try:
+        response = query_matches(take,skip,steam_id,position)
+        responses_batch.append(response)
+        print(f"skip is {skip}")
+    except Exception as error:
+        print("API GAVE UP")
+        print(f"Error:{error}")
+        print(f"skip is {skip}")
+
+for batch in responses_batch:
+    responses.extend(batch)
+
+df_raw = pd.json_normalize(responses,"players",["id"])
 
 def make_excel_sheets(df,sheet_name):
     file_name = sheet_name + ".xlsx"
@@ -200,13 +211,14 @@ def make_excel_sheets(df,sheet_name):
         df.to_excel(file_name)
 
 
-print(df_raw)
+#print(df_raw)
 
 df_calculated = (adding_columns(df_raw,steam_id,minute)) #this function turns df_raw into df_calculated
-print(df_calculated)
+#print(df_calculated)
 
 df_player_calculations = player_calculations(df_calculated)
-print(df_player_calculations)
+#print(df_player_calculations)
+print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
 #make_excel_sheets(df_raw,"raw_data")
 make_excel_sheets(df_player_calculations,"player_calculations")
@@ -214,4 +226,4 @@ make_excel_sheets(df_player_calculations,"player_calculations")
 #look at how the reddit guy used skips (for loop to query multiple times) and use that to get larger sample size
 #future implementatons: query usage counter and limit, added columns for xp, wins, cs, denies..., graph the data and wins/winrate, and calculate average numbers for live/highmmr games
 
-#function and variable naming: snake_case for everything except column labels which are in pascalCase, as the stratz api uses pascalCase for theirs
+#there is a nan in levels list, fix. its cus random matches like 7900186009 have playbackdata = null for all, even though it passes isParsed and has a parsedDateTime? (matches 0-100)

@@ -2,6 +2,7 @@ import requests
 import numpy as np
 import pandas as pd
 import openpyxl
+import time
 
 #GOAL: START SIMPLE. SIMPLY PULL AVERAGE DATA FROM MY PROFILE.
 # MAYBE CALCULATE MY LANING SKILL ISSUE, GOLD AT 10MIN AND STOP BLAMING TEAM
@@ -16,9 +17,12 @@ Headers = {
     "User-Agent": "STRATZ_API",
 }
 def stratz_query(query):
+    query_start_time = time.time()
     response = requests.post(Api_Stratz_Url, json={"query":query}, headers = Headers)
+    query_end_time = time.time()
+    time_for_api_query = query_end_time - query_start_time
     if response.status_code == 200:
-        return response.json()
+        return (response.json(),time_for_api_query)
     else:
         raise Exception(f"SOMETHING WENT WRONG: status code is {response.status_code} and text returned is {response.text}")
 
@@ -60,8 +64,9 @@ def query_matches(take,skips,steam_id,position):
     }}
     """
 
-    response = stratz_query(query)["data"]["player"]["matches"]
-    return response
+    response, time_taken = stratz_query(query)
+    response = response["data"]["player"]["matches"]
+    return (response,time_taken)
 
 
 def adding_columns(df_raw,steam_id,minute):
@@ -114,7 +119,7 @@ def adding_columns(df_raw,steam_id,minute):
                 level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
                 df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
 
-        ###levels_column(df_raw,df_calculated,match_id,minute) #this is broken, probably not enough specificiers on where to put data. itterows would just use i, but im tryna use vectorization
+        ###levels_column(df_raw,df_calculated,match_id,minute)
 
     df_calculated["isOnMyTeam"] = df_raw["isOnMyTeam"]
 
@@ -182,8 +187,8 @@ position = "POSITION_1"
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 100
-number_of_matches_to_parse = 500 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+skip_interval = 2
+number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 responses = []
@@ -191,10 +196,16 @@ responses_batch = []
 take, skips = skip_calculator(number_of_matches_to_parse,skip_interval)
 print(take,skips)
 for skip in skips: #does the querying each time for skip
+
     try:
-        response = query_matches(take,skip,steam_id,position)
-        responses_batch.append(response)
+        query_data, time_taken = query_matches(take,skip,steam_id,position) #gets the query_data and time_taken as a tuple
+        responses_batch.append(query_data)
+        
+        #with open("api_call_count.txt") as api_call_count:
+        #    api_call_count += 
+
         print(f"skip is {skip}")
+        print(f"time for api query was {time_taken} seconds")
     except Exception as error:
         print("API GAVE UP")
         print(f"Error:{error}")
@@ -211,7 +222,7 @@ def make_excel_sheets(df,sheet_name):
         df.to_excel(file_name)
 
 
-#print(df_raw)
+print(df_raw)
 
 df_calculated = (adding_columns(df_raw,steam_id,minute)) #this function turns df_raw into df_calculated
 #print(df_calculated)
@@ -220,7 +231,7 @@ df_player_calculations = player_calculations(df_calculated)
 #print(df_player_calculations)
 print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
-#make_excel_sheets(df_raw,"raw_data")
+make_excel_sheets(df_raw,"raw_data")
 make_excel_sheets(df_player_calculations,"player_calculations")
 
 #look at how the reddit guy used skips (for loop to query multiple times) and use that to get larger sample size

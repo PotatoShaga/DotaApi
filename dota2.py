@@ -2,6 +2,8 @@ import requests
 import numpy as np
 import pandas as pd
 import openpyxl
+import time
+import sys
 
 #GOAL: START SIMPLE. SIMPLY PULL AVERAGE DATA FROM MY PROFILE.
 # MAYBE CALCULATE MY LANING SKILL ISSUE, GOLD AT 10MIN AND STOP BLAMING TEAM
@@ -16,12 +18,35 @@ Headers = {
     "User-Agent": "STRATZ_API",
 }
 def stratz_query(query):
+    query_start_time = time.time()
     response = requests.post(Api_Stratz_Url, json={"query":query}, headers = Headers)
-    if response.status_code == 200:
-        return response.json()
+    query_end_time = time.time()
+    time_for_api_query = query_end_time - query_start_time
+    print(f"time for api query was {time_for_api_query}")
+    print(response.headers)
+    if response.status_code == 200: #catches errors and ratelimits calculations
+        rate_limiter(response)
+        return (response)
     else:
         raise Exception(f"SOMETHING WENT WRONG: status code is {response.status_code} and text returned is {response.text}")
 
+def rate_limiter(response):
+    response_headers = response.headers
+    if int(response_headers["ratelimit-reset"]) == 0:
+        print(f"RATELIMIT-RESET == 0")
+        time.sleep(1)
+    if int(response_headers["x-ratelimit-remaining-second"]) <= 1:
+        print(f"RATELIMIT REMAINING PER SECOND  <= 1 (out of {response_headers["x-ratelimit-limit-second"]}/s), SLEEPING FOR 1 S")
+        time.sleep(1)
+    if int(response_headers["x-ratelimit-remaining-minute"]) <= 1:
+        print(f"RATELIMIT REMAINING PER MINUTE  <= 1 (out of {response_headers["x-ratelimit-limit-minute"]}/s), SLEEPING FOR 60 S")
+        time.sleep(60)
+    if int(response_headers["x-ratelimit-remaining-hour"]) <= 50:
+        print(f"RATELIMIT REMAINING PER HOUR  <= 50 (out of {response_headers["x-ratelimit-limit-hour"]}/s), EXITING")
+        sys.exit()
+    if int(response_headers["x-ratelimit-remaining-day"]) <= 800:
+        print(f"RATELIMIT REMAINING PER HOUR  <= 800 (out of {response_headers["x-ratelimit-limit-day"]}/s), EXITING")
+        sys.exit()
 
 def query_matches(take,skips,steam_id,position):
 #double {{ is to allow using { for f string, print({{steam_id}}) results in {steam_id}; curly brackets for graphQL syntax preserved
@@ -60,8 +85,10 @@ def query_matches(take,skips,steam_id,position):
     }}
     """
 
-    response = stratz_query(query)["data"]["player"]["matches"]
-    return response
+    response = stratz_query(query) #response consists of json and header
+    response_json = response.json()
+    response_json = response_json["data"]["player"]["matches"]
+    return (response_json)
 
 
 def adding_columns(df_raw,steam_id,minute):
@@ -114,7 +141,7 @@ def adding_columns(df_raw,steam_id,minute):
                 level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
                 df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
 
-        ###levels_column(df_raw,df_calculated,match_id,minute) #this is broken, probably not enough specificiers on where to put data. itterows would just use i, but im tryna use vectorization
+        ###levels_column(df_raw,df_calculated,match_id,minute)
 
     df_calculated["isOnMyTeam"] = df_raw["isOnMyTeam"]
 
@@ -182,8 +209,8 @@ position = "POSITION_1"
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 100
-number_of_matches_to_parse = 500 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+skip_interval = 20
+number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 responses = []
@@ -191,9 +218,14 @@ responses_batch = []
 take, skips = skip_calculator(number_of_matches_to_parse,skip_interval)
 print(take,skips)
 for skip in skips: #does the querying each time for skip
+
     try:
-        response = query_matches(take,skip,steam_id,position)
-        responses_batch.append(response)
+        query_data = query_matches(take,skip,steam_id,position) #gets the query_data and time_taken as a tuple
+        responses_batch.append(query_data)
+        
+        #with open("api_call_count.txt") as api_call_count:
+        #    api_call_count += 
+
         print(f"skip is {skip}")
     except Exception as error:
         print("API GAVE UP")
@@ -211,7 +243,7 @@ def make_excel_sheets(df,sheet_name):
         df.to_excel(file_name)
 
 
-#print(df_raw)
+print(df_raw)
 
 df_calculated = (adding_columns(df_raw,steam_id,minute)) #this function turns df_raw into df_calculated
 #print(df_calculated)
@@ -220,7 +252,7 @@ df_player_calculations = player_calculations(df_calculated)
 #print(df_player_calculations)
 print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
-#make_excel_sheets(df_raw,"raw_data")
+make_excel_sheets(df_raw,"raw_data")
 make_excel_sheets(df_player_calculations,"player_calculations")
 
 #look at how the reddit guy used skips (for loop to query multiple times) and use that to get larger sample size

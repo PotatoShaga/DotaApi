@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import openpyxl
 import time
+import sys
 
 #GOAL: START SIMPLE. SIMPLY PULL AVERAGE DATA FROM MY PROFILE.
 # MAYBE CALCULATE MY LANING SKILL ISSUE, GOLD AT 10MIN AND STOP BLAMING TEAM
@@ -21,11 +22,31 @@ def stratz_query(query):
     response = requests.post(Api_Stratz_Url, json={"query":query}, headers = Headers)
     query_end_time = time.time()
     time_for_api_query = query_end_time - query_start_time
-    if response.status_code == 200:
-        return (response.json(),time_for_api_query)
+    print(f"time for api query was {time_for_api_query}")
+    print(response.headers)
+    if response.status_code == 200: #catches errors and ratelimits calculations
+        rate_limiter(response)
+        return (response)
     else:
         raise Exception(f"SOMETHING WENT WRONG: status code is {response.status_code} and text returned is {response.text}")
 
+def rate_limiter(response):
+    response_headers = response.headers
+    if int(response_headers["ratelimit-reset"]) == 0:
+        print(f"RATELIMIT-RESET == 0")
+        time.sleep(1)
+    if int(response_headers["x-ratelimit-remaining-second"]) <= 1:
+        print(f"RATELIMIT REMAINING PER SECOND  <= 1 (out of {response_headers["x-ratelimit-limit-second"]}/s), SLEEPING FOR 1 S")
+        time.sleep(1)
+    if int(response_headers["x-ratelimit-remaining-minute"]) <= 1:
+        print(f"RATELIMIT REMAINING PER MINUTE  <= 1 (out of {response_headers["x-ratelimit-limit-minute"]}/s), SLEEPING FOR 60 S")
+        time.sleep(60)
+    if int(response_headers["x-ratelimit-remaining-hour"]) <= 50:
+        print(f"RATELIMIT REMAINING PER HOUR  <= 50 (out of {response_headers["x-ratelimit-limit-hour"]}/s), EXITING")
+        sys.exit()
+    if int(response_headers["x-ratelimit-remaining-day"]) <= 800:
+        print(f"RATELIMIT REMAINING PER HOUR  <= 800 (out of {response_headers["x-ratelimit-limit-day"]}/s), EXITING")
+        sys.exit()
 
 def query_matches(take,skips,steam_id,position):
 #double {{ is to allow using { for f string, print({{steam_id}}) results in {steam_id}; curly brackets for graphQL syntax preserved
@@ -64,9 +85,10 @@ def query_matches(take,skips,steam_id,position):
     }}
     """
 
-    response, time_taken = stratz_query(query)
-    response = response["data"]["player"]["matches"]
-    return (response,time_taken)
+    response = stratz_query(query) #response consists of json and header
+    response_json = response.json()
+    response_json = response_json["data"]["player"]["matches"]
+    return (response_json)
 
 
 def adding_columns(df_raw,steam_id,minute):
@@ -187,7 +209,7 @@ position = "POSITION_1"
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 2
+skip_interval = 20
 number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
@@ -198,14 +220,13 @@ print(take,skips)
 for skip in skips: #does the querying each time for skip
 
     try:
-        query_data, time_taken = query_matches(take,skip,steam_id,position) #gets the query_data and time_taken as a tuple
+        query_data = query_matches(take,skip,steam_id,position) #gets the query_data and time_taken as a tuple
         responses_batch.append(query_data)
         
         #with open("api_call_count.txt") as api_call_count:
         #    api_call_count += 
 
         print(f"skip is {skip}")
-        print(f"time for api query was {time_taken} seconds")
     except Exception as error:
         print("API GAVE UP")
         print(f"Error:{error}")

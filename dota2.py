@@ -5,6 +5,8 @@ import openpyxl
 import time
 import sys
 
+pd.options.display.max_columns = None
+
 #GOAL: START SIMPLE. SIMPLY PULL AVERAGE DATA FROM MY PROFILE.
 # MAYBE CALCULATE MY LANING SKILL ISSUE, GOLD AT 10MIN AND STOP BLAMING TEAM
 
@@ -47,6 +49,9 @@ def rate_limiter(response):
         print(f"RATELIMIT REMAINING PER HOUR  <= 800 (out of {response_headers["x-ratelimit-limit-day"]}/s), EXITING")
         sys.exit()
 
+#matchIds: [7929996674,7900186009] add this to request: to test on specific matches, just include as a list
+
+
 def query_matches(take,skips,steam_id,position):
 #double {{ is to allow using { for f string, print({{steam_id}}) results in {steam_id}; curly brackets for graphQL syntax preserved
     query = f"""{{
@@ -56,7 +61,6 @@ def query_matches(take,skips,steam_id,position):
         positionIds: {position}
         take: {take}
         skip: {skips}
-        matchIds: 7900186009
 
         }}) {{
         id
@@ -133,21 +137,16 @@ def adding_columns(df_raw,steam_id,minute):
         def levels_column(df_raw,df_calculated,match_id,minute):
             seconds = (minute-1) * 60
             for i,row in df_raw[df_raw["id"] == match_id].iterrows(): #this function similar to stats_sum_column, this itterates over each batch of id=match_id (which is unique 10 rows (10players per unique match))
-                print(type(row["playbackData"]),'THIS IS TYPE')
-                if type(row["playbackData"]) is None:
-                    print("NONE")
-                    continue
                 levelup_row = row["playbackData.playerUpdateLevelEvents"] #gets the specific cell data by the name, "playbackdata.."
-                print(levelup_row)
-                print(type(levelup_row))
-                if levelup_row[0]["level"] == "null":
+
+                if isinstance(levelup_row, list): #kind of disgusting fix, if the column entry (aka row) is normal its a list, if its not normal (aka empty, None or NaN) then its not a list
+                    levelup_df = pd.DataFrame(levelup_row) #turns the cell data, a list of dicts, into df for easier computation
+                    df_filtered = levelup_df[levelup_df["time"]<=seconds]
+                    level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
+                    df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
+                else:
+                    #print("LEVELUP_ROW IS NOT A LIST (PROBABLY NaN)")
                     continue
-                #print(levelup_row)
-                #print(match_id)
-                levelup_df = pd.DataFrame(levelup_row) #turns the cell data, a list of dicts, into df for easier computation
-                df_filtered = levelup_df[levelup_df["time"]<=seconds]
-                level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
-                df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
 
         levels_column(df_raw,df_calculated,match_id,minute)
 
@@ -187,7 +186,7 @@ def player_calculations(df_calculated):
     networth_difference(df_calculated)
     averages(df_calculated,position,True,"lastHitsPerMinuteSum","lastHitsAverage")
     averages(df_calculated,position,True,"deniesPerMinuteSum","deniesAverage")
-    ###averages(df_calculated,position,True,"level","levelAverage")
+    averages(df_calculated,position,True,"level","levelAverage")
 
 
     df_player_calculations = pd.DataFrame(player_calculations_list)
@@ -218,7 +217,7 @@ position = "POSITION_1"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 3 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 3000 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 responses = []
@@ -243,6 +242,7 @@ for skip in skips: #does the querying each time for skip
 for batch in responses_batch:
     responses.extend(batch)
 
+
 df_raw = pd.json_normalize(responses,"players",["id"])
 
 def make_excel_sheets(df,sheet_name):
@@ -252,16 +252,16 @@ def make_excel_sheets(df,sheet_name):
 
 
 print(df_raw)
+make_excel_sheets(df_raw,"raw_data")
 
 df_calculated = (adding_columns(df_raw,steam_id,minute)) #this function turns df_raw into df_calculated
-#print(df_calculated)
+#print(df_calculated,"CALC")
 
 df_player_calculations = player_calculations(df_calculated)
-#print(df_player_calculations)
-print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
-
-make_excel_sheets(df_raw,"raw_data")
+print(df_player_calculations)
 make_excel_sheets(df_player_calculations,"player_calculations")
+
+print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
 #look at how the reddit guy used skips (for loop to query multiple times) and use that to get larger sample size
 #future implementatons: query usage counter and limit, added columns for xp, wins, cs, denies..., graph the data and wins/winrate, and calculate average numbers for live/highmmr games

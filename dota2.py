@@ -22,8 +22,7 @@ def stratz_query(query):
     response = requests.post(Api_Stratz_Url, json={"query":query}, headers = Headers)
     query_end_time = time.time()
     time_for_api_query = query_end_time - query_start_time
-    print(f"time for api query was {time_for_api_query}")
-    print(response.headers)
+    print(f"time for api query was {time_for_api_query}") 
     if response.status_code == 200: #catches errors and ratelimits calculations
         rate_limiter(response)
         return (response)
@@ -31,7 +30,7 @@ def stratz_query(query):
         raise Exception(f"SOMETHING WENT WRONG: status code is {response.status_code} and text returned is {response.text}")
 
 def rate_limiter(response):
-    response_headers = response.headers
+    response_headers = response.headers #response.headers give the full info
     if int(response_headers["ratelimit-reset"]) == 0:
         print(f"RATELIMIT-RESET == 0")
         time.sleep(1)
@@ -57,6 +56,7 @@ def query_matches(take,skips,steam_id,position):
         positionIds: {position}
         take: {take}
         skip: {skips}
+        matchIds: 7900186009
 
         }}) {{
         id
@@ -133,15 +133,23 @@ def adding_columns(df_raw,steam_id,minute):
         def levels_column(df_raw,df_calculated,match_id,minute):
             seconds = (minute-1) * 60
             for i,row in df_raw[df_raw["id"] == match_id].iterrows(): #this function similar to stats_sum_column, this itterates over each batch of id=match_id (which is unique 10 rows (10players per unique match))
+                print(type(row["playbackData"]),'THIS IS TYPE')
+                if type(row["playbackData"]) is None:
+                    print("NONE")
+                    continue
                 levelup_row = row["playbackData.playerUpdateLevelEvents"] #gets the specific cell data by the name, "playbackdata.."
                 print(levelup_row)
-                print(match_id)
+                print(type(levelup_row))
+                if levelup_row[0]["level"] == "null":
+                    continue
+                #print(levelup_row)
+                #print(match_id)
                 levelup_df = pd.DataFrame(levelup_row) #turns the cell data, a list of dicts, into df for easier computation
                 df_filtered = levelup_df[levelup_df["time"]<=seconds]
                 level = df_filtered.iloc[-1]["level"] #gets last level event, aka most recent level up. data distilled from df --> int
                 df_calculated.loc[i,"level"] = level #adds this int to df_calculated by the row its on
 
-        ###levels_column(df_raw,df_calculated,match_id,minute)
+        levels_column(df_raw,df_calculated,match_id,minute)
 
     df_calculated["isOnMyTeam"] = df_raw["isOnMyTeam"]
 
@@ -209,8 +217,8 @@ position = "POSITION_1"
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 20
-number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+skip_interval = 25
+number_of_matches_to_parse = 3 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 responses = []

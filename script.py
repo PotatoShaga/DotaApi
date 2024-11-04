@@ -13,10 +13,10 @@ position = "POSITION_1"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 10
-number_of_matches_to_parse = 200 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
-def make_all_excel_sheets(df_raw,df_player_calculations): #just for ease of use, so i dont have to call every one seperately
+def make_all_excel_sheets(): #just for ease of use, so i dont have to call every one seperately
     def excel_sheets_maker(df,sheet_name):
         file_name = sheet_name + ".xlsx"
         with open(file_name,"w") as df_file:
@@ -26,13 +26,16 @@ def make_all_excel_sheets(df_raw,df_player_calculations): #just for ease of use,
     excel_sheets_maker(df_player_calculations,"player_calculations")
 
 
+#SCRIPT
+
+df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
 print(df_raw)
 
-df_calculated = (adding_columns(df_raw,steam_id,minute)) #this function turns df_raw into df_calculated
+df_calculated = calculations.adding_columns(df_raw,steam_id,minute) #this function turns df_raw into df_calculated
 print("--------------------")
 print(df_calculated)
 
-df_player_calculations = player_calculations(df_calculated)
+df_player_calculations = calculations.player_calculations(df_calculated)
 print(df_player_calculations)
 
 make_all_excel_sheets()

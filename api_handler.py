@@ -122,7 +122,7 @@ def skip_calculator(number_of_matches_to_parse,skip_interval):
     return (take, skips)
 
 
-def queries_to_batches_main(take, skips, steam_id, position, skip_interval, number_of_matches_to_parse):
+def queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse):
     responses = []
     responses_batch = []
     take, skips = skip_calculator(number_of_matches_to_parse,skip_interval)

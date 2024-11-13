@@ -16,14 +16,6 @@ Headers = {
 }
 
 
-steam_id = 405788540
-position = "POSITION_1"
-"========================================================"
-duration = 20
-minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 10
-number_of_matches_to_parse = 200 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
-"========================================================"
 
 
 def intializes_call(query):
@@ -140,7 +132,6 @@ def queries_to_batches_main(steam_id, position, skip_interval, number_of_matches
 
     for batch in responses_batch:
         responses.extend(batch)
-
     df_raw = pd.json_normalize(responses,"players",["id"])
 
     return df_raw

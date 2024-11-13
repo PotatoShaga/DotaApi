@@ -1,14 +1,19 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import openpyxl
+import xlsxwriter
 
 pd.options.display.max_columns = None
 
+
+#CONSTRUCTS df_calculated
 
 def adding_columns(df_raw,steam_id,minute):
     important_raw_columns = ["id","playerSlot","position","heroId"]
     df_calculated = df_raw[important_raw_columns].copy()
     df_calculated["networthDifference"] = 0
 
-    for match_id in df_raw["id"].unique(): #agnostically gets raw data for everyone. specific person specification happens in player_calculations
+    for match_id in df_raw["id"].unique(): #agnostically gets raw data for everyone. more specific specification happens in player_calculations
         
 
         def is_on_my_team_column(df_raw,match_id,steam_id): #for some reason these parameters arent needed inside this adding_columns function? like code works perfectly fine if u delete the parameters, ig cus parameters already gotten
@@ -86,12 +91,16 @@ def adding_columns(df_raw,steam_id,minute):
     return df_calculated #finishes for loop
 
 
+
+#PLAYER SPECIFIC CALCULATIONS
+#most of the work is getting specific values from df_calculated into a sum/average. Requires no specifics as it calculates this for every single player (and data is all main character centric)
+
 def player_calculations(df_calculated):
     player_calculations_list = [{}] #final output is list of one dict, so df is all on row 0. add by expanding list[0]["key"]=value
 
 
     def networth_difference(df_calculated):
-        nw_dict = { 
+        nw_dict = {  #Ally-Enemy 
             1:"" , #1 is 1-1
             2:"" , #2 is 2-2
             3:"" , #3 is 3-3
@@ -114,13 +123,6 @@ def player_calculations(df_calculated):
 
     networth_difference(df_calculated)
 
-    def averages(df_calculated,position,isOnMyTeam,sum_label,dict_key):
-        row_data = df_calculated.loc[(df_calculated["position"] == position) & (df_calculated["isOnMyTeam"] == isOnMyTeam)]
-        df_sum = row_data[sum_label]
-        sum = df_sum.mean() #takes the df of every match's sum and averages all the matches
-        sum = round(sum,5)
-        player_calculations_list[0][dict_key] = sum 
-    
     def average_of_each_players_stat(df_calculated, stat_label, dict_key, mode="Append"): #this takes the average of each of the 10 unique players stats` and gives it back in a dict 1-10 listed in order of your team then their team
         average_dict = {}
         average_dict[1] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_1") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5)  #gets all your pos and team row, gets all these rows at [stat_label], means and rounds to dict[key:1]
@@ -134,7 +136,7 @@ def player_calculations(df_calculated):
         average_dict[8] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_3") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
         average_dict[9] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_4") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
         average_dict[10]= round((df_calculated.loc[(df_calculated["position"] == "POSITION_5") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
-
+        #Bruh do vectorisation with mean(axis=0)? the numpy or pandas way
         if mode == "Append": #by default will append value to the output dict with key:value
             player_calculations_list[0][dict_key] = average_dict
 
@@ -155,3 +157,38 @@ def player_calculations(df_calculated):
 
     df_player_calculations = pd.DataFrame(player_calculations_list)
     return df_player_calculations
+
+
+#PLAYER SPECIFIC GRAPHS
+def player_graphs(df_calculated, position, isOnMyTeam=True): #can specify position and isOnMyTeam=False to generate graphs of enemies/other players
+    df_centric_to_main_character = df_calculated[(df_calculated["position"] == position) & (df_calculated["isOnMyTeam"] == isOnMyTeam)]
+    dict_of_plts = {}
+
+
+    def networth_difference_graph(locator):
+        df_y_values = df_centric_to_main_character[locator]
+        df_x_values = range(1, len(df_y_values)+1)
+        plt.figure()
+
+        plt.scatter(df_x_values, df_y_values, alpha=0.5)
+        ###plt.plot(df_x_values, df_y_values) #this connects the datapoints with a line. for large number of datapoints, it looks very messy
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.title(f"{locator}")
+
+        df_moving_average = df_y_values.rolling(window=10, min_periods=1).mean() #this is the average in a window of 10, will be inaccurate for first 10 and last 10 items
+        plt.plot(df_x_values, df_moving_average, color='blue', label='Moving Average', linewidth=2)
+
+        current_plot = plt.gcf() #get current figure
+        dict_of_plts[locator] = current_plot
+    
+
+    networth_difference_graph("networthDifference") #not sure if this works, its not i-th term its actually just your pos and isonmyteam (so random location on networthdiff)
+    networth_difference_graph("lastHitsPerMinuteSum")
+    networth_difference_graph("deniesPerMinuteSum")
+    networth_difference_graph("level")
+    networth_difference_graph("kills")
+    networth_difference_graph("deaths") #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio 
+
+    return dict_of_plts
+

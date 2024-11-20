@@ -51,8 +51,14 @@ def adding_columns(df_raw,steam_id,minute):
         stats_sum_column(df_raw,df_calculated,match_id,minute,"deniesPerMinute")
         
 
-        def levels_column(df_raw,df_calculated,match_id,minute,column_label,df_calculated_name):
+        def levels_column(df_raw, df_calculated, match_id, minute, column_label, df_calculated_name):
             seconds = (minute-1) * 60
+            #if the playbackData.playerUpdateLevelEvents column doesnt exist, fuck it set all values to 0. Since I know stratz stores playback data only for 1-3 months, if theres no recent data theres probably not old data
+            #
+            if column_label not in df_raw.columns:  
+                df_raw[column_label] = 0
+                df_calculated[df_calculated_name] = 0
+
             for i,row in df_raw[df_raw["id"] == match_id].iterrows(): #this function similar to stats_sum_column, this itterates over each batch of id=match_id (which is unique 10 rows (10players per unique match))
                 levelup_row = row[column_label] #gets the specific cell data by the name, "playbackdata.."
 
@@ -64,11 +70,16 @@ def adding_columns(df_raw,steam_id,minute):
                 else:
                     continue
         
-        levels_column(df_raw,df_calculated,match_id,minute,"playbackData.playerUpdateLevelEvents","level")
+        levels_column(df_raw, df_calculated, match_id, minute, "playbackData.playerUpdateLevelEvents", "level")
 
 
         def kills_deaths_column(df_raw,df_calculated,match_id,minute,column_label,df_calculated_name): #ALMOST IDENTICAL TO LEVELS_COLUMN
             seconds = (minute-1) * 60
+
+            if column_label not in df_raw.columns:  
+                df_raw[column_label] = 0
+                df_calculated[df_calculated_name] = 0
+
             for i,row in df_raw[df_raw["id"] == match_id].iterrows(): 
                 levelup_row = row[column_label] 
 
@@ -81,6 +92,7 @@ def adding_columns(df_raw,steam_id,minute):
                     else:
                         df_calculated.loc[i,df_calculated_name] = 0 #if levelup_row is empty, that means its value = 0
                 else:
+                    df_raw[column_label] = 0
                     continue
 
         kills_deaths_column(df_raw,df_calculated,match_id,minute,"playbackData.killEvents","kills")

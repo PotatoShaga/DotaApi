@@ -36,10 +36,6 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     with open(file_name,"w") as df_file:
         df_raw.to_excel(file_name)
 
-    file_name = "player_calculations" + ".xlsx"
-    with open(file_name,"w") as df_file:
-        df_player_calculations.to_excel(file_name)
-
     for key in dict_of_plts:
         dict_of_plts[key].savefig(f"{key}.png", format="png")
         plt.close(dict_of_plts[key])

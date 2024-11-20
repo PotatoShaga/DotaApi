@@ -55,7 +55,8 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for index 1-5 (so index 3 is YourPos3-TheirPos3). Index 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1)"
     ws["A6"].alignment = Alignment(wrap_text=True, vertical="top")
     ws["A7"] = "The stats above kills/deaths are the kda ratio"
-    ws["A8"] = "If levels/kda is empty that means stratz api returned no playbackData. Try parsing your latest match on stratz (idk if this will work)" 
+    ws["A8"] = "If levels/kda is empty that means stratz api returned no playbackData. Try parsing your latest match on stratz (idk if this will work)"
+    ws["A8"].alignment = Alignment(wrap_text=True, vertical="top") 
 
     ws["B1"] = df_player_calculations["networth_difference"].to_string()
     ws["B1"].alignment = Alignment(wrap_text=True, vertical="top")

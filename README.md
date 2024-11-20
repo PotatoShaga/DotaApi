@@ -1,5 +1,5 @@
 # DotaApi
-For networthDifference, the stats are ordered by comparing the respective positions to themselves for index 1-5. Index 6-10 are comparing positions to their lane opposition. It follows the table below:
+For networthDifference, the stats are ordered by comparing the respective positions to themselves for index 1-5. Index 6-10 are comparing positions to their lane opposition. It follows the table below: \n
 Formula: AllyPosition - EnemyPosition
 #1 is 1-1 #so gets difference between pos1 of your team and pos1 of enemy team
 #2 is 2-2

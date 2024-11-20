@@ -34,7 +34,7 @@ def adding_columns(df_raw,steam_id,minute):
                 my_pos_net_worth = df_raw.loc[(df_raw["position"] == position_ally[i]) & (df_raw["isOnMyTeam"] ==  True) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
                 their_pos_net_worth = df_raw.loc[(df_raw["position"] == position_enemy[i]) & (df_raw["isOnMyTeam"] ==  False) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
                 if (my_pos_net_worth is not None) and (their_pos_net_worth is not None) and (len(my_pos_net_worth) > minute): #does all the finding and math in df_raw and variables, then slaps it into df_calculated
-                    pos_diff = my_pos_net_worth[minute] - their_pos_net_worth[minute]
+                    pos_diff = my_pos_net_worth[minute-1] - their_pos_net_worth[minute-1]
                     df_calculated.loc[(df_calculated["id"] == match_id) & (df_calculated.index % 10 == i), "networthDifference"] += pos_diff #able to put it order of pos1,pos2 cus it matches to the index%10=i
 
         networth_difference_column(df_raw,df_calculated,match_id,minute) 
@@ -177,8 +177,13 @@ def player_graphs(df_calculated, position, isOnMyTeam=True): #can specify positi
     dict_of_plts = {}
 
 
-    def networth_difference_graph(locator):
-        df_y_values = df_centric_to_main_character[locator]
+    def stat_graph(locator, need_ith_term=False):
+        if need_ith_term == True: #only runs for networth_diff
+            start = int(position[-1]) + 5 - 1#for POSITION_1, start = 1 + 5 - 1 = 5. So this should take the networth diff 6-10, which is opposition laner. -1 is df starts at row 0, not row 1
+            df_y_values = df_calculated.iloc[start::10]["networthDifference"]
+        elif need_ith_term == False:
+            df_y_values = df_centric_to_main_character[locator]
+        
         df_x_values = range(1, len(df_y_values)+1)
         plt.figure()
 
@@ -195,12 +200,12 @@ def player_graphs(df_calculated, position, isOnMyTeam=True): #can specify positi
         dict_of_plts[locator] = current_plot
     
 
-    networth_difference_graph("networthDifference") #not sure if this works, its not i-th term its actually just your pos and isonmyteam (so random location on networthdiff)
-    networth_difference_graph("lastHitsPerMinuteSum")
-    networth_difference_graph("deniesPerMinuteSum")
-    networth_difference_graph("level")
-    networth_difference_graph("kills")
-    networth_difference_graph("deaths") #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio 
+    stat_graph("networthDifference", need_ith_term=True)
+    stat_graph("lastHitsPerMinuteSum")
+    stat_graph("deniesPerMinuteSum")
+    stat_graph("level")
+    stat_graph("kills")
+    stat_graph("deaths") #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio 
 
     return dict_of_plts
 

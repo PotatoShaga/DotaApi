@@ -14,14 +14,20 @@ pd.options.display.max_colwidth = None #for some fucking reason pandas truncates
 #VARIABLES
 
 #steam_id = 405788540
-steam_id = 171262902 #watson
+#steam_id = 171262902 #watson
+#steam_id = 898455820 #malrine
+#steam_id = 183719386 #atf
+#steam_id = 360577618 #snlork
+#steam_id = 177658823 #off
+steam_id = 52023367 #hobbes
+
 position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 10
-number_of_matches_to_parse = 500 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+skip_interval = 25
+number_of_matches_to_parse = 200 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(): #just for ease of use, so i dont have to call every one seperately
@@ -49,6 +55,7 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for index 1-5 (so index 3 is YourPos3-TheirPos3). Index 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1)"
     ws["A6"].alignment = Alignment(wrap_text=True, vertical="top")
     ws["A7"] = "The stats above kills/deaths are the kda ratio"
+    ws["A8"] = "If levels/kda is empty that means stratz api returned no playbackData. Try parsing your latest match on stratz (idk if this will work)" 
 
     ws["B1"] = df_player_calculations["networth_difference"].to_string()
     ws["B1"].alignment = Alignment(wrap_text=True, vertical="top")
@@ -86,7 +93,7 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
 #SCRIPT
 
 df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
-###print(df_raw)
+print(df_raw)
 
 df_calculated = calculations.adding_columns(df_raw,steam_id,minute) #this function turns df_raw into df_calculated
 print("--------------------")

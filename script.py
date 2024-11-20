@@ -21,13 +21,13 @@ steam_id = 183719386 #atf
 #steam_id = 177658823 #off
 #steam_id = 52023367 #hobbes
 
-position = "POSITION_3"
-isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
+position = "POSITION_1"
+isOnMyTeam = False #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 1 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 200 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(): #just for ease of use, so i dont have to call every one seperately
@@ -98,6 +98,6 @@ print("--------------------")
 df_player_calculations = calculations.player_calculations(df_calculated)
 ###print(df_player_calculations)
 
-dict_of_plts = calculations.player_graphs(df_calculated, position, isOnMyTeam) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
+dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
 make_all_excel_sheets()
 print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")

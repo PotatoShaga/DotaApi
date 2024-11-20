@@ -179,8 +179,8 @@ def player_calculations(df_calculated):
 
 
 #PLAYER SPECIFIC GRAPHS
-def player_graphs(df_calculated, position, isOnMyTeam=True): #can specify position and isOnMyTeam=False to generate graphs of enemies/other players
-    df_centric_to_main_character = df_calculated[(df_calculated["position"] == position) & (df_calculated["isOnMyTeam"] == isOnMyTeam)]
+def player_graphs(df_calculated, position): #can specify position and isOnMyTeam=False to generate graphs of enemies/other players
+    df_centric_to_main_character = df_calculated[(df_calculated["position"] == position) & (df_calculated["isOnMyTeam"] == True)]
     dict_of_plts = {}
 
 

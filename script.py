@@ -15,13 +15,14 @@ pd.options.display.max_colwidth = None #for some fucking reason pandas truncates
 
 #steam_id = 405788540
 steam_id = 171262902 #watson
+#steam_id = 108203659 #rusy
 position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
-skip_interval = 10
-number_of_matches_to_parse = 500 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+skip_interval = 25
+number_of_matches_to_parse = 200 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(): #just for ease of use, so i dont have to call every one seperately
@@ -29,10 +30,6 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     file_name = "raw_data" + ".xlsx"
     with open(file_name,"w") as df_file:
         df_raw.to_excel(file_name)
-
-    file_name = "player_calculations" + ".xlsx"
-    with open(file_name,"w") as df_file:
-        df_player_calculations.to_excel(file_name)
 
     for key in dict_of_plts:
         dict_of_plts[key].savefig(f"{key}.png", format="png")
@@ -46,7 +43,7 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     ws["A5"] = f"Parsing last {number_of_matches_to_parse} matches of {steam_id}. \nPARAMETERS: position={position}, ally={isOnMyTeam}, taking stats at minute {minute-1}."
     ws["A5"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.column_dimensions["A"].width = 50
-    ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for index 1-5 (so index 3 is YourPos3-TheirPos3). Index 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1)"
+    ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for index 1-5 (so index 3 is YourPos3-TheirPos3). Index 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1). The graph compares you agaisnt your lane opponent"
     ws["A6"].alignment = Alignment(wrap_text=True, vertical="top")
     ws["A7"] = "The stats above kills/deaths are the kda ratio"
 
@@ -90,10 +87,10 @@ df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, 
 
 df_calculated = calculations.adding_columns(df_raw,steam_id,minute) #this function turns df_raw into df_calculated
 print("--------------------")
-print(df_calculated)
+###print(df_calculated)
 
 df_player_calculations = calculations.player_calculations(df_calculated)
-print(df_player_calculations)
+###print(df_player_calculations)
 
 dict_of_plts = calculations.player_graphs(df_calculated, position, isOnMyTeam) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
 make_all_excel_sheets()

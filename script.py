@@ -86,7 +86,6 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     print("Excel Sheets created!")
 
 
-
 #SCRIPT
 
 df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)

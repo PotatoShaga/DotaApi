@@ -48,7 +48,7 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     ws["A5"] = f"Parsing last {number_of_matches_to_parse} matches of {steam_id}. \nPARAMETERS: position={position}, ally={isOnMyTeam}, taking stats at minute {minute-1}."
     ws["A5"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.column_dimensions["A"].width = 50
-    ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for index 1-5 (so index 3 is YourPos3-TheirPos3). Index 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1)"
+    ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for index 1-5 (so index 3 is YourPos3-TheirPos3). Index 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1). The graph compares you agaisnt your lane opponent"
     ws["A6"].alignment = Alignment(wrap_text=True, vertical="top")
     ws["A7"] = "The stats above kills/deaths are the kda ratio"
     ws["A8"] = "If levels/kda is empty/lacking data that means stratz api returned no playbackData. Try parsing your latest match on stratz (idk if this will work)"
@@ -94,10 +94,10 @@ print(df_raw)
 
 df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam) #this function turns df_raw into df_calculated
 print("--------------------")
-print(df_calculated)
+###print(df_calculated)
 
 df_player_calculations = calculations.player_calculations(df_calculated)
-print(df_player_calculations)
+###print(df_player_calculations)
 
 dict_of_plts = calculations.player_graphs(df_calculated, position, isOnMyTeam) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
 make_all_excel_sheets()

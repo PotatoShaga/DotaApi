@@ -184,23 +184,29 @@ def player_graphs(df_calculated, position): #can specify position and isOnMyTeam
     dict_of_plts = {}
 
 
-    def stat_graph(locator, need_ith_term=False):
+    def stat_graph(locator, need_ith_term=False, levels_kda = False):
         if need_ith_term == True: #only runs for networth_diff
             start = int(position[-1]) + 5 - 1#for POSITION_1, start = 1 + 5 - 1 = 5. So this should take the networth diff 6-10, which is opposition laner. -1 is df starts at row 0, not row 1
             df_y_values = df_calculated.iloc[start::10]["networthDifference"]
+            df_y_values = df_y_values.iloc[::-1] #reverses y value order, so that reading the plot left to right is oldest to newest matches
         elif need_ith_term == False:
             df_y_values = df_centric_to_main_character[locator]
+            df_y_values = df_y_values.iloc[::-1]
         
         df_x_values = range(1, len(df_y_values)+1)
         plt.figure()
 
         plt.scatter(df_x_values, df_y_values, alpha=0.5)
-        ###plt.plot(df_x_values, df_y_values) #this connects the datapoints with a line. for large number of datapoints, it looks very messy
         plt.xlabel("x")
         plt.ylabel("y")
         plt.title(f"{locator}")
 
-        df_moving_average = df_y_values.rolling(window=10, min_periods=1).mean() #this is the average in a window of 10, will be inaccurate for first 10 and last 10 items
+        if levels_kda == True: #just makes window value more precise for levels/kda, which usually has so little datapoints from playbackdata running out it always looks meaningless
+            window_value = 5
+        elif levels_kda == False: 
+            window_value = 25
+
+        df_moving_average = df_y_values.rolling(window=window_value, min_periods=1).mean() #this is the average in a window of 10, will be inaccurate for first 10 and last 10 items
         plt.plot(df_x_values, df_moving_average, color='blue', label='Moving Average', linewidth=2)
 
         current_plot = plt.gcf() #get current figure
@@ -210,9 +216,9 @@ def player_graphs(df_calculated, position): #can specify position and isOnMyTeam
     stat_graph("networthDifference", need_ith_term=True)
     stat_graph("lastHitsPerMinuteSum")
     stat_graph("deniesPerMinuteSum")
-    stat_graph("level")
-    stat_graph("kills")
-    stat_graph("deaths") #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio 
+    stat_graph("level", levels_kda = True)
+    stat_graph("kills", levels_kda = True)
+    stat_graph("deaths", levels_kda = True) #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio 
 
     return dict_of_plts
 

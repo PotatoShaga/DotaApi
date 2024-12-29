@@ -2,13 +2,19 @@ import requests
 import pandas as pd
 import time
 import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 #This file should take return a bunch of print statements (skip/take, if rate limiters catch error, time for query..) and ONE list (batch) of all the data. Input parameters should be specified in the script.py file
 
 pd.options.display.max_columns = None
 
 Api_Stratz_Url = "https://api.stratz.com/graphql"
-token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJTdWJqZWN0IjoiZmRmNjcwYjEtYThhOS00NjM1LTk0ZjktZjBmYTVjZDkzZjU5IiwiU3RlYW1JZCI6IjQwNTc4ODU0MCIsIm5iZiI6MTczMjEzODIyNiwiZXhwIjoxNzYzNjc0MjI2LCJpYXQiOjE3MzIxMzgyMjYsImlzcyI6Imh0dHBzOi8vYXBpLnN0cmF0ei5jb20ifQ.zIZMsJbX86aJmVRkxPt9wSI5yVB_nLUYVApNnlg5JEM"
+token = os.getenv("TOKEN")
+
 Headers = {
     "content-type": "application/json",
     "Authorization": f"Bearer {token}",

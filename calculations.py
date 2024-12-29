@@ -188,7 +188,6 @@ def player_graphs(df_calculated, position): #can specify position and isOnMyTeam
         if need_ith_term == True: #only runs for networth_diff
             start = int(position[-1]) + 5 - 1#for POSITION_1, start = 1 + 5 - 1 = 5. So this should take the networth diff 6-10, which is opposition laner. -1 is df starts at row 0, not row 1
             df_y_values = df_calculated.iloc[start::10]["networthDifference"]
-            df_y_values = df_y_values.iloc[::-1] #reverses y value order, so that reading the plot left to right is oldest to newest matches
         elif need_ith_term == False:
             df_y_values = df_centric_to_main_character[locator]
             df_y_values = df_y_values.iloc[::-1]
@@ -197,9 +196,10 @@ def player_graphs(df_calculated, position): #can specify position and isOnMyTeam
         plt.figure()
 
         plt.scatter(df_x_values, df_y_values, alpha=0.5)
-        plt.xlabel("x")
-        plt.ylabel("y")
+        plt.xlabel("oldest --> newest games")
+        plt.ylabel("data")
         plt.title(f"{locator}")
+        plt.gca().invert_xaxis() #so graph reads oldest --> newest instead of listing newest games from the left side
 
         if levels_kda == True: #just makes window value more precise for levels/kda, which usually has so little datapoints from playbackdata running out it always looks meaningless
             window_value = 5

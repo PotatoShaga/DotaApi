@@ -32,7 +32,11 @@ skip_interval = 25
 number_of_matches_to_parse = 10 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
-def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
+def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
+    minute = int(minute)
+    position = str(position)
+    number_of_matches_to_parse = int(number_of_matches_to_parse)
+
     #GOAL: ONE EXCEL BOOK, 2 SHEETS FOR RAW, FINAL CALCULATIONS, MAYBE EVEN df_calculated. FINAL CALC WILL HAVE PHOTOS
     file_name = "raw_data" + ".xlsx"
     df_raw.to_excel(file_name)
@@ -47,7 +51,7 @@ def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, isOnMyTe
     ws["A1"] = "Stats: (average data of everyone in the game, in relation to you)"
     ws["A1"].alignment = Alignment(wrap_text=True, vertical="top")
     ws["A3"] = "Graphs: (plotted data of only you)"
-    ws["A5"] = f"Parsing last {number_of_matches_to_parse} matches of {steam_id}. \nPARAMETERS: position={position}, ally={isOnMyTeam}, taking stats at minute {minute-1}."
+    ws["A5"] = f"Parsing last {number_of_matches_to_parse} matches of {steam_id}. \nPARAMETERS: position={position}, ally={isOnMyTeam}, taking stats at minute {(int(minute)-1)}."
     ws["A5"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.column_dimensions["A"].width = 50
     ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for indices 1-5 (so index 3 is YourPos3-TheirPos3). Indices 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1). The graph compares you agaisnt your lane opponent"
@@ -106,7 +110,7 @@ def main_script(steam_id=405788540, position="POSITION_1", isOnMyTeam=True, minu
     print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
     file_path = "master.xlsx"
-    make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts)
+    make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam)
     return file_path
 
 

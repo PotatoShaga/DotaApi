@@ -42,7 +42,7 @@ def index(request): #gets request from urls which send data to index, which curr
 
     if steam_id:
         steam_id = int(steam_id) #entire code breaks if input is not as int, as it cannot comprehend a string input!
-        position = f"POSITION{position}"
+        position = f"POSITION_{position}"
         isOnMyTeam = bool(isOnMyTeam)
         minute = int(minute)
         skip_interval = int(skip_interval)
@@ -52,7 +52,7 @@ def index(request): #gets request from urls which send data to index, which curr
         request.session["file_path"] = file_path
 
     if download and file_path:
-        print("OK?")
+        print("Download Complete!")
         return FileResponse(open(file_path, "rb"), as_attachment=True, filename=os.path.basename(file_path))
 
     return render(request, "index.html", {"excelsheet":file_path})

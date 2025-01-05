@@ -120,11 +120,11 @@ def skip_calculator(number_of_matches_to_parse,skip_interval):
     return (take, skips)
 
 
-def queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse):
+def queries_to_batches_main(steam_id, position="POSITION_1", skip_interval=10, number_of_matches_to_parse=1):
     responses = []
     responses_batch = []
     take, skips = skip_calculator(number_of_matches_to_parse,skip_interval)
-    print(f"SKIP INTERVAL IS {take}, SKIP INCREMENTS ARE {skips}")
+    ###print(f"SKIP INTERVAL IS {take}, SKIP INCREMENTS ARE {skips}")
     for skip in skips: #does the querying each time for skip
 
         try:
@@ -132,9 +132,10 @@ def queries_to_batches_main(steam_id, position, skip_interval, number_of_matches
             responses_batch.append(query_data)
             print(f"Current Increment: {skip}")
         except Exception as error:
-            print("API GAVE UP")
-            print(f"Error:{error}")
-            print(f"Current Increment: {skip}")
+            ###print("API GAVE UP")
+            ###print(f"Error:{error}")
+            ####print(f"Current Increment: {skip}")
+            pass
 
     for batch in responses_batch:
         responses.extend(batch)

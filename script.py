@@ -1,10 +1,12 @@
 import pandas as pd
-import api_handler
-import calculations
+from DotaApi import api_handler
+from DotaApi import calculations
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
 import xlsxwriter
+import matplotlib 
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 
@@ -25,28 +27,31 @@ steam_id = 405788540
 position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
-duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
 number_of_matches_to_parse = 10 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
-def make_all_excel_sheets(): #just for ease of use, so i dont have to call every one seperately
+def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
+    minute = int(minute)
+    position = str(position)
+    number_of_matches_to_parse = int(number_of_matches_to_parse)
+
     #GOAL: ONE EXCEL BOOK, 2 SHEETS FOR RAW, FINAL CALCULATIONS, MAYBE EVEN df_calculated. FINAL CALC WILL HAVE PHOTOS
     file_name = "raw_data" + ".xlsx"
-    with open(file_name,"w") as df_file:
-        df_raw.to_excel(file_name)
+    df_raw.to_excel(file_name)
 
     for key in dict_of_plts:
-        dict_of_plts[key].savefig(f"{key}.png", format="png")
-        plt.close(dict_of_plts[key])
+        fig = dict_of_plts[key]
+        fig.savefig(f"{key}.png", format="png")
+        plt.close(fig)
 
     wb = openpyxl.Workbook()
     ws = wb.active
     ws["A1"] = "Stats: (average data of everyone in the game, in relation to you)"
     ws["A1"].alignment = Alignment(wrap_text=True, vertical="top")
     ws["A3"] = "Graphs: (plotted data of only you)"
-    ws["A5"] = f"Parsing last {number_of_matches_to_parse} matches of {steam_id}. \nPARAMETERS: position={position}, ally={isOnMyTeam}, taking stats at minute {minute-1}."
+    ws["A5"] = f"Parsing last {number_of_matches_to_parse} matches of {steam_id}. \nPARAMETERS: position={position}, ally={isOnMyTeam}, taking stats at minute {(int(minute)-1)}."
     ws["A5"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.column_dimensions["A"].width = 50
     ws["A6"] = "The networthDifference stats are ordered by comparing the respective positions to themselves for indices 1-5 (so index 3 is YourPos3-TheirPos3). Indices 6-10 are comparing positions to their lane opposition (index 8 is YourPos3-TheirPos1). The graph compares you agaisnt your lane opponent"
@@ -83,22 +88,31 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     
     
     wb.save("master.xlsx")
-    
+
     print("Excel Sheets created!")
 
 
 #SCRIPT
+def main_script(steam_id=405788540, position="POSITION_1", isOnMyTeam=True, minute=11, skip_interval=10, number_of_matches_to_parse=1):
 
-df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
-print(df_raw)
+    df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
+    #print(df_raw)
 
-df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam) #this function turns df_raw into df_calculated
-print("--------------------")
-###print(df_calculated)
+    ###print("--------------------")
+    df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam) #this function turns df_raw into df_calculated
+    ###print("--------------------")
+    ###print(df_calculated)
+    df_player_calculations = calculations.player_calculations(df_calculated)
+    df_player_calculations_string = df_player_calculations.to_string()
+    #print(df_player_calculations)
 
-df_player_calculations = calculations.player_calculations(df_calculated)
-###print(df_player_calculations)
+    dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
+    print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
-dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
-make_all_excel_sheets()
-print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
+    file_path = "master.xlsx"
+    make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam)
+    return file_path
+
+
+if __name__ == "__main__":
+    main_script(steam_id, position, isOnMyTeam, minute, skip_interval, number_of_matches_to_parse)

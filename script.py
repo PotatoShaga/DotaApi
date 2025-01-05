@@ -1,6 +1,6 @@
 import pandas as pd
-import api_handler
-import calculations
+from DotaApi import api_handler
+from DotaApi import calculations
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
@@ -31,11 +31,10 @@ skip_interval = 25
 number_of_matches_to_parse = 10 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
-def make_all_excel_sheets(): #just for ease of use, so i dont have to call every one seperately
+def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
     #GOAL: ONE EXCEL BOOK, 2 SHEETS FOR RAW, FINAL CALCULATIONS, MAYBE EVEN df_calculated. FINAL CALC WILL HAVE PHOTOS
     file_name = "raw_data" + ".xlsx"
-    with open(file_name,"w") as df_file:
-        df_raw.to_excel(file_name)
+    df_raw.to_excel(file_name)
 
     for key in dict_of_plts:
         dict_of_plts[key].savefig(f"{key}.png", format="png")
@@ -83,22 +82,31 @@ def make_all_excel_sheets(): #just for ease of use, so i dont have to call every
     
     
     wb.save("master.xlsx")
-    
+
     print("Excel Sheets created!")
 
 
 #SCRIPT
+def main_script(steam_id=405788540, position="POSITION_1", skip_interval=10, number_of_matches_to_parse=1):
 
-df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
-print(df_raw)
+    df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
+    ###print(df_raw)
 
-df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam) #this function turns df_raw into df_calculated
-print("--------------------")
-###print(df_calculated)
+    df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam=True) #this function turns df_raw into df_calculated
+    #print("--------------------")
+    ###print(df_calculated)
 
-df_player_calculations = calculations.player_calculations(df_calculated)
-###print(df_player_calculations)
+    df_player_calculations = calculations.player_calculations(df_calculated)
+    #print(df_player_calculations)
 
-dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
-make_all_excel_sheets()
-print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
+    dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
+    #print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
+
+    
+
+    #return "Bruh"
+    return make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts)
+
+
+if __name__ == "__main__":
+    main_script(steam_id)

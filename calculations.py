@@ -8,7 +8,7 @@ pd.options.display.max_columns = None
 
 #CONSTRUCTS df_calculated
 
-def adding_columns(df_raw,steam_id,minute, isOnMyTeam):
+def adding_columns(df_raw, steam_id, minute, isOnMyTeam):
     important_raw_columns = ["id","playerSlot","position","heroId"]
     df_calculated = df_raw[important_raw_columns].copy()
     df_calculated["networthDifference"] = 0
@@ -16,7 +16,7 @@ def adding_columns(df_raw,steam_id,minute, isOnMyTeam):
     for match_id in df_raw["id"].unique(): #agnostically gets raw data for everyone. more specific specification happens in player_calculations
         
 
-        def is_on_my_team_column(df_raw,match_id,steam_id, isOnMyTeam=True): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
+        def is_on_my_team_column(df_raw, match_id, steam_id, isOnMyTeam=True): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
             radiant = df_raw.loc[(df_raw["steamAccountId"]==steam_id) & (df_raw["id"]==match_id),"isRadiant"].values[0]
 
             if isOnMyTeam == True:
@@ -34,7 +34,7 @@ def adding_columns(df_raw,steam_id,minute, isOnMyTeam):
 
 
         #first df is df_raw, second df is df_calculated 
-        def networth_difference_column(df_raw,df_calculated,match_id,minute): #for each position, finds the difference of MyPosNW - TheirPosNW and then adds it the column in the order of pos1,pos2,po3,pos4,pos5. Will ALWAYS be perspective of ally - enemy.
+        def networth_difference_column(df_raw, df_calculated, match_id, minute): #for each position, finds the difference of MyPosNW - TheirPosNW and then adds it the column in the order of pos1,pos2,po3,pos4,pos5. Will ALWAYS be perspective of ally - enemy.
             position_ally = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",        "POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5"]
             position_enemy = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",       "POSITION_3","POSITION_2","POSITION_1","POSITION_5","POSITION_4"]
             for i,pos in enumerate(position_ally):

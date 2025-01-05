@@ -25,7 +25,6 @@ steam_id = 405788540
 position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
-duration = 20
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
 number_of_matches_to_parse = 10 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
@@ -87,25 +86,25 @@ def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, isOnMyTe
 
 
 #SCRIPT
-def main_script(steam_id=405788540, position="POSITION_1", skip_interval=10, number_of_matches_to_parse=1):
+def main_script(steam_id=405788540, position="POSITION_1", isOnMyTeam=True, minute=11, skip_interval=10, number_of_matches_to_parse=1):
 
     df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
-    ###print(df_raw)
+    #print(df_raw)
 
-    df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam=True) #this function turns df_raw into df_calculated
-    #print("--------------------")
+    ###print("--------------------")
+    df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam) #this function turns df_raw into df_calculated
+    ###print("--------------------")
     ###print(df_calculated)
-
     df_player_calculations = calculations.player_calculations(df_calculated)
+    df_player_calculations_string = df_player_calculations.to_string()
     #print(df_player_calculations)
 
     dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
-    #print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
+    print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
-    
-
-    #return "Bruh"
-    return make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts)
+    file_path = "master.xlsx"
+    make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts)
+    return file_path
 
 
 if __name__ == "__main__":

@@ -1,11 +1,12 @@
 <form method="GET">
         {% csrf_token %}
-        <label for="steam_id">steam_id (9 digits):</label>
-        <input type="text" id="steam_id" name="steam_id" placeholder="GIVE ID" required><br>
+        <label for="steam_id">steam_id:</label>
+        <input type="text" id="steam_id" name="steam_id" placeholder="enter 9 digit steam_id" required><br>
         <button type="submit">Submit</button>
 </form>
 
-<div>
-    {{excelsheet}}
-</div>
-
+{% if excelsheet %}
+    <a href="?steam_id={{ steam_id }}&download=true">
+        <button type="button">Download Excel Sheet</button>
+    </a>
+{% endif %}

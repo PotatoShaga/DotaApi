@@ -12,11 +12,10 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam):
     important_raw_columns = ["id","playerSlot","position","heroId"]
     df_calculated = df_raw[important_raw_columns].copy()
     df_calculated["networthDifference"] = 0
-
     for match_id in df_raw["id"].unique(): #agnostically gets raw data for everyone. more specific specification happens in player_calculations
         
 
-        def is_on_my_team_column(df_raw, match_id, steam_id, isOnMyTeam=True): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
+        def is_on_my_team_column(df_raw, match_id, steam_id, isOnMyTeam): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
             radiant = df_raw.loc[(df_raw["steamAccountId"]==steam_id) & (df_raw["id"]==match_id),"isRadiant"].values[0]
 
             if isOnMyTeam == True:

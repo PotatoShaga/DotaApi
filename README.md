@@ -14,3 +14,6 @@ Formula: AllyPosition - EnemyPosition
 #10 is 5-4  
 
 There is a large issue with stratz api not returning playbackData for certain matches/matches past a certain point. Probably to do with how they parse matches/requires manual parse. Values will default to 0 when theres no data, which will dampen stats towards 0.
+
+# Running the website locally
+Change your current directory to DotaApi/djangotut, and type into the console python manage.py runserver. Then ctrl click the local address to open it. The unneeded excel files (pngs, raw _data exceel sheet) are stored inside djangotut. 

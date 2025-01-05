@@ -5,6 +5,8 @@ import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
 import xlsxwriter
+import matplotlib 
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 
@@ -36,8 +38,9 @@ def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, isOnMyTe
     df_raw.to_excel(file_name)
 
     for key in dict_of_plts:
-        dict_of_plts[key].savefig(f"{key}.png", format="png")
-        plt.close(dict_of_plts[key])
+        fig = dict_of_plts[key]
+        fig.savefig(f"{key}.png", format="png")
+        plt.close(fig)
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -108,4 +111,4 @@ def main_script(steam_id=405788540, position="POSITION_1", isOnMyTeam=True, minu
 
 
 if __name__ == "__main__":
-    main_script(steam_id)
+    main_script(steam_id, position, isOnMyTeam, minute, skip_interval, number_of_matches_to_parse)

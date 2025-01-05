@@ -1,4 +1,12 @@
 # DotaApi
+This python program takes in your steam_id and position to request a query to StratzApi. Processing the data from the query, it provides a statistical overview (data + graph) of your relative networth, cs/denies, level, and kda at a selected minute. This program can be run from the terminal, or run from a website locally. 
+
+The data processing uses mostly Pandas' dataframes, the data is given in the form of an excelsheet, the graphs were made with Matplotlib, and the website was created with Django. 
+
+# Running the website locally
+Change your current directory to DotaApi/djangotut, and type into the console python manage.py runserver. Then ctrl-click the local address to open it. The unneeded excel files (pngs, raw _data exceel sheet) are stored inside djangotut. 
+
+# netWorthDifference
 For networthDifference, the stats are ordered by comparing the respective positions to themselves for index 1-5. Index 6-10 are comparing positions to their lane opposition. It follows the table below:  
 
 Formula: AllyPosition - EnemyPosition  
@@ -12,8 +20,3 @@ Formula: AllyPosition - EnemyPosition
 #8 is 3-1  
 #9 is 4-5  
 #10 is 5-4  
-
-There is a large issue with stratz api not returning playbackData for certain matches/matches past a certain point. Probably to do with how they parse matches/requires manual parse. Values will default to 0 when theres no data, which will dampen stats towards 0.
-
-# Running the website locally
-Change your current directory to DotaApi/djangotut, and type into the console python manage.py runserver. Then ctrl click the local address to open it. The unneeded excel files (pngs, raw _data exceel sheet) are stored inside djangotut. 

@@ -76,7 +76,6 @@ def query_call(take,skips,steam_id,position):
             isVictory
             position
             heroId
-            playerSlot
             playbackData {{
                 playerUpdateLevelEvents {{
                     time

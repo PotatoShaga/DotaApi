@@ -6,11 +6,14 @@ pd.options.display.max_columns = None
 
 #CONSTRUCTS df_calculated
 
-def adding_columns(df_raw, steam_id, minute, isOnMyTeam):
-    important_raw_columns = ["id","playerSlot","position","heroId"]
+def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position):
+    important_raw_columns = ["id","steamAccountId","position","heroId", "isVictory"]
     df_calculated = df_raw[important_raw_columns].copy()
     df_calculated["networthDifference"] = 0
-    for match_id in df_raw["id"].unique(): #agnostically gets raw data for everyone. more specific specification happens in player_calculations
+    df_raw["wins"] = 0
+    df_raw["totalmatches"] = 0
+    for indices, match_id in enumerate(df_raw["id"].unique()): #agnostically gets raw data for everyone (except in winrate). more specific specification happens in player_calculations
+        print(indices)
         
 
         def is_on_my_team_column(df_raw, match_id, steam_id, isOnMyTeam): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
@@ -18,17 +21,41 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam):
 
             if isOnMyTeam == True:
                 if radiant == True:
-                    df_raw.loc[df_raw["id"] == match_id,"isOnMyTeam"] = df_raw["isRadiant"]
+                    df_raw.loc[df_raw["id"]==match_id,"isOnMyTeam"] = df_raw["isRadiant"]
                 else:
-                    df_raw.loc[df_raw["id"] == match_id,"isOnMyTeam"] = ~df_raw["isRadiant"]
+                    df_raw.loc[df_raw["id"]==match_id,"isOnMyTeam"] = ~df_raw["isRadiant"]
 
             elif isOnMyTeam == False:
                 if radiant == True:
-                    df_raw.loc[df_raw["id"] == match_id,"isOnMyTeam"] = ~df_raw["isRadiant"] #not operator gets swapped if ==false (so everything gets inverted)
+                    df_raw.loc[df_raw["id"]==match_id,"isOnMyTeam"] = ~df_raw["isRadiant"] #not operator gets swapped if ==false (so everything gets inverted)
                 else:
-                    df_raw.loc[df_raw["id"] == match_id,"isOnMyTeam"] = df_raw["isRadiant"]
+                    df_raw.loc[df_raw["id"]==match_id,"isOnMyTeam"] = df_raw["isRadiant"]
         is_on_my_team_column(df_raw,match_id,steam_id, isOnMyTeam)
 
+        def winrate_column(df_raw, df_calculated, match_id, steam_id, number_of_matches_to_parse):
+            victory_bool = df_raw.loc[(df_raw["id"]==match_id) & (df_raw["steamAccountId"]==steam_id), "isVictory"].values[0]
+            if indices == 0:
+
+                denominator = number_of_matches_to_parse*0 + 1
+                if victory_bool == True:
+                    numerator = number_of_matches_to_parse*0 + 1
+                if victory_bool == False:
+                    numerator = number_of_matches_to_parse*0 #dampening looks work then just starting at 0 or 100, need database implementation here. number_of matches should be # past week matches
+
+            elif indices != 0:
+                numerator = df_raw.loc[(df_raw["id"]==previous_match_id) & (df_raw["steamAccountId"]==steam_id), "wins"].values[0] #pulls num and denom from df_raw's previous data
+                denominator = df_raw.loc[(df_raw["id"]==previous_match_id) & (df_raw["steamAccountId"]==steam_id), "totalmatches"].values[0] # I NEED PREVIOUS MATCHID
+                denominator += 1
+                if victory_bool == True:
+                    numerator += 1
+            #print(f"THIS IS NUMERATOR AND DENOMINATOR: {numerator}, {denominator}")
+            df_raw.loc[(df_raw["id"]==match_id) & (df_raw["steamAccountId"]==steam_id), "wins"] = numerator #assigns num and denom to df_raw
+            df_raw.loc[(df_raw["id"]==match_id) & (df_raw["steamAccountId"]==steam_id), "totalmatches"] = denominator
+
+            winrate = numerator / denominator
+            df_calculated.loc[(df_calculated["id"]==match_id) & (df_calculated["steamAccountId"]==steam_id), "winrate"] = winrate
+        winrate_column(df_raw, df_calculated, match_id, steam_id, number_of_matches_to_parse)
+        previous_match_id = match_id
 
         #first df is df_raw, second df is df_calculated 
         def networth_difference_column(df_raw, df_calculated, match_id, minute): #for each position, finds the difference of MyPosNW - TheirPosNW and then adds it the column in the order of pos1,pos2,po3,pos4,pos5. Will ALWAYS be perspective of ally - enemy.
@@ -163,6 +190,8 @@ def player_calculations(df_calculated):
     average_of_each_players_stat(df_calculated,"deniesPerMinuteSum","deniesAverage")
     average_of_each_players_stat(df_calculated,"level","levelAverage")
 
+
+
     def quick_kda_zip():
         kills_dict = average_of_each_players_stat(df_calculated,"kills","kdaAverage", mode="Value")
         deaths_dict = average_of_each_players_stat(df_calculated,"deaths","kdaAverage", mode="Value")
@@ -215,7 +244,7 @@ def player_graphs(df_calculated, position): #can specify position and isOnMyTeam
     stat_graph("deniesPerMinuteSum")
     stat_graph("level", levels_kda = True)
     stat_graph("kills", levels_kda = True)
-    stat_graph("deaths", levels_kda = True) #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio 
+    stat_graph("deaths", levels_kda = True) #will take more work to get graph of kda, as when its 1/0, you can't plot the ratio
 
     return dict_of_plts
 

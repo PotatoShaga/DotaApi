@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 pd.options.display.max_columns = None
 
 
-#CONSTRUCTS df_calculated
+#This file contains the functions which construct df_calculated/df_player_calculated from df_raw, and generate the matlab graphs
 
 def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position):
     important_raw_columns = ["id","steamAccountId","position","heroId", "isVictory"]

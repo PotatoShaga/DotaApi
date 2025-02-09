@@ -8,9 +8,10 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+#This file imports all the functions from the other files and uses it's own excelsheet creator function to output the master.xlsx excel sheet
 
 pd.options.display.max_columns = None
-pd.options.display.max_colwidth = None #for some fucking reason pandas truncates df.to_string() if colwidth has a cap
+pd.options.display.max_colwidth = None #for some reason pandas truncates df.to_string() if colwidth has a cap
 
 #VARIABLES
 
@@ -30,7 +31,6 @@ def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id
     position = str(position)
     number_of_matches_to_parse = int(number_of_matches_to_parse)
 
-    #GOAL: ONE EXCEL BOOK, 2 SHEETS FOR RAW, FINAL CALCULATIONS, MAYBE EVEN df_calculated. FINAL CALC WILL HAVE PHOTOS
     file_name = "raw_data" + ".xlsx"
     df_raw.to_excel(file_name)
 

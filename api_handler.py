@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-#This file should take return a bunch of print statements (skip/take, if rate limiters catch error, time for query..) and ONE list (batch) of all the data. Input parameters should be specified in the script.py file
+#This file contains the functions which sends the GraphQL query to stratz, and rate limiting/pagination
 
 pd.options.display.max_columns = None
 

@@ -1,6 +1,7 @@
 import pandas as pd
 from DotaApi import api_handler
 from DotaApi import calculations
+from DotaApi import database_handler
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
@@ -8,16 +9,17 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+#This file imports all the functions from the other files and uses it's own excelsheet creator function to output the master.xlsx excel sheet
 
 pd.options.display.max_columns = None
-pd.options.display.max_colwidth = None #for some fucking reason pandas truncates df.to_string() if colwidth has a cap
+pd.options.display.max_colwidth = None #for some reason pandas truncates df.to_string() if colwidth has a cap
 
 #VARIABLES
 
 steam_id = 171262902 #watson
 steam_id = 405788540
 
-position = "POSITION_3"
+position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
@@ -30,7 +32,6 @@ def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id
     position = str(position)
     number_of_matches_to_parse = int(number_of_matches_to_parse)
 
-    #GOAL: ONE EXCEL BOOK, 2 SHEETS FOR RAW, FINAL CALCULATIONS, MAYBE EVEN df_calculated. FINAL CALC WILL HAVE PHOTOS
     file_name = "raw_data" + ".xlsx"
     df_raw.to_excel(file_name)
 
@@ -95,8 +96,11 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     print(df_calculated)
     print("----------------")
 
-    df_player_calculations = calculations.player_calculations(df_calculated)
+    df_player_calculations = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position)
     print(df_player_calculations)
+    print(type(df_player_calculations))
+
+    database_handler.db_player_calculations(df_player_calculations)
 
     dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
     print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")

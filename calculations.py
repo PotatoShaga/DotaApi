@@ -138,9 +138,20 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_pa
 #PLAYER SPECIFIC CALCULATIONS
 #most of the work is getting specific values from df_calculated into a sum/average. Requires no specifics as it calculates this for every single player (and data is all main character centric)
 
-def player_calculations(df_calculated):
-    player_calculations_list = [{}] #final output is list of one dict, so df is all on row 0. add by expanding list[0]["key"]=value
+def player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position):
+    player_calculations_list = [{}] #final output is list of one dict, so df is all on row 0. add by expanding list[0]["key"]=value. turned into df last second
 
+    def player_parameters(steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position):
+        parameter_dict = {
+            "steam_id": steam_id,
+            "minute": minute-1,
+            "isOnMyTeam": isOnMyTeam,
+            "number_of_matches_to_parse": number_of_matches_to_parse,
+            "position": position,
+        }
+        player_calculations_list[0]["player_parameters"] = parameter_dict
+
+    player_parameters(steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position)
 
     def networth_difference(df_calculated):
         nw_dict = {#Ally-Enemy 

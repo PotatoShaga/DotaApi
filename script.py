@@ -88,10 +88,12 @@ def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id
 
 #SCRIPT
 def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minute=11, skip_interval=10, number_of_matches_to_parse=10):
-
+    # Api querying, extraction of json response
     df_raw = api_handler.queries_to_batches_main(steam_id, position, skip_interval, number_of_matches_to_parse)
     #print(df_raw)
     #print("=================")
+
+    # Constructon of calculated dataframes
     df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position) #this function turns df_raw into df_calculated
     print(df_calculated)
     print("----------------")
@@ -100,11 +102,14 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     print(df_player_calculations)
     print(type(df_player_calculations))
 
-    database_handler.db_player_calculations(df_player_calculations)
+    # Database interfacing functions
+    database_handler.table_player_calculations(df_player_calculations)
 
+    # Creates plots 
     dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)
     print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
+    # Creates excel sheet
     file_path = "master.xlsx"
     make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam)
     return file_path

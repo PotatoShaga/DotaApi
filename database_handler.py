@@ -26,7 +26,7 @@ def table_player_calculations(df_player_calculations): #inserts or updates the d
         else:
             pass
 
-    print(f"{column_name_string} = {column_value_string}")
+    #print(f"{column_name_string} = {column_value_string}")
     query = f"INSERT OR REPLACE INTO player_calculations ({column_name_string}) VALUES ({column_value_string})" #need '{}' for text, integers dont need it
     cursor.execute(query)
     #query = f"INSERT OR REPLACE INTO player_calculations (steam_id, networth_difference) VALUES ({steam_id}, '{networth_difference_json}')" #need '{}' for text, integers dont need it

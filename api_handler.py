@@ -26,7 +26,7 @@ Headers = {
 
 def intializes_call(query):
     query_start_time = time.time()
-    response = requests.post(Api_Stratz_Url, json={"query":query}, headers = Headers)
+    response = requests.post(Api_Stratz_Url, json={"query":query}, headers = Headers) # the line where stratz is actually queried, rest is just local checks
     query_end_time = time.time()
     time_for_api_query = query_end_time - query_start_time
     print(f"time for api query was {time_for_api_query}") 
@@ -107,7 +107,7 @@ def query_call(take,skips,steam_id,position):
 
 
 def skip_calculator(number_of_matches_to_parse,skip_interval): 
-    if number_of_matches_to_parse <= skip_interval:
+    if number_of_matches_to_parse <= skip_interval: # for when n < skip interval, dont need skips
         take = number_of_matches_to_parse
         skips = [0]
     else:

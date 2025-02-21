@@ -2,6 +2,7 @@ import pandas as pd
 from DotaApi import api_handler
 from DotaApi import calculations
 from DotaApi import database_handler
+from DotaApi import winrate
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
@@ -24,7 +25,7 @@ isOnMyTeam = True #this is only used in player_graphs and worksheet string. by d
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 5 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 1 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
@@ -97,6 +98,8 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position) #this function turns df_raw into df_calculated
     print(df_calculated)
     print("----------------")
+
+    winrate.create_df_winrate(df_raw)
 
     df_player_calculations = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position)
     print(df_player_calculations)

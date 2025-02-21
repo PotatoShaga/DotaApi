@@ -13,7 +13,7 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_pa
     df_raw["wins"] = 0
     df_raw["totalmatches"] = 0
     for indices, match_id in enumerate(df_raw["id"].unique()): #agnostically gets raw data for everyone (except in winrate). more specific specification happens in player_calculations
-        print(indices)
+        #print(indices)
         
 
         def is_on_my_team_column(df_raw, match_id, steam_id, isOnMyTeam): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
@@ -62,7 +62,7 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_pa
             position_ally = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",        "POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5"]
             position_enemy = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",       "POSITION_3","POSITION_2","POSITION_1","POSITION_5","POSITION_4"]
             for i,pos in enumerate(position_ally):
-                my_pos_net_worth = df_raw.loc[(df_raw["position"] == position_ally[i]) & (df_raw["isOnMyTeam"] ==  True) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
+                my_pos_net_worth = df_raw.loc[(df_raw["position"] == position_ally[i]) & (df_raw["isOnMyTeam"] ==  True) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0] # this searching for multiple conditions for every operation is probably slow? if df_raw were listed by pos1,pos2.. it wouldn't need condition searching
                 their_pos_net_worth = df_raw.loc[(df_raw["position"] == position_enemy[i]) & (df_raw["isOnMyTeam"] ==  False) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
                 if (my_pos_net_worth is not None) and (their_pos_net_worth is not None) and (len(my_pos_net_worth) > minute): #does all the finding and math in df_raw and variables, then slaps it into df_calculated
                     pos_diff = my_pos_net_worth[minute-1] - their_pos_net_worth[minute-1]

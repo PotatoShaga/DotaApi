@@ -13,7 +13,7 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_pa
     df_raw["wins"] = 0
     df_raw["totalmatches"] = 0
     for indices, match_id in enumerate(df_raw["id"].unique()): #agnostically gets raw data for everyone (except in winrate). more specific specification happens in player_calculations
-        print(indices)
+        #print(indices)
         
 
         def is_on_my_team_column(df_raw, match_id, steam_id, isOnMyTeam): #isOnMyTeam is variable in script to see if you actually want correct or inverted results
@@ -62,7 +62,7 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_pa
             position_ally = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",        "POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5"]
             position_enemy = ["POSITION_1","POSITION_2","POSITION_3","POSITION_4","POSITION_5",       "POSITION_3","POSITION_2","POSITION_1","POSITION_5","POSITION_4"]
             for i,pos in enumerate(position_ally):
-                my_pos_net_worth = df_raw.loc[(df_raw["position"] == position_ally[i]) & (df_raw["isOnMyTeam"] ==  True) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
+                my_pos_net_worth = df_raw.loc[(df_raw["position"] == position_ally[i]) & (df_raw["isOnMyTeam"] ==  True) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0] # this searching for multiple conditions for every operation is probably slow? if df_raw were listed by pos1,pos2.. it wouldn't need condition searching
                 their_pos_net_worth = df_raw.loc[(df_raw["position"] == position_enemy[i]) & (df_raw["isOnMyTeam"] ==  False) & (df_raw["id"] == match_id), "stats.networthPerMinute"].values[0]
                 if (my_pos_net_worth is not None) and (their_pos_net_worth is not None) and (len(my_pos_net_worth) > minute): #does all the finding and math in df_raw and variables, then slaps it into df_calculated
                     pos_diff = my_pos_net_worth[minute-1] - their_pos_net_worth[minute-1]
@@ -138,7 +138,7 @@ def adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_pa
 #PLAYER SPECIFIC CALCULATIONS
 #most of the work is getting specific values from df_calculated into a sum/average. Requires no specifics as it calculates this for every single player (and data is all main character centric)
 
-def player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position):
+def player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position, winrate_dict):
     player_calculations_list = [{}] #final output is list of one dict, so df is all on row 0. add by expanding list[0]["key"]=value. turned into df last second
 
     def player_parameters(steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position):
@@ -210,6 +210,8 @@ def player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_m
         player_calculations_list[0]["kdaAverage"] = kda_dict
 
     quick_kda_zip()
+
+    player_calculations_list[0]["winrate"] = winrate_dict
 
     df_player_calculations = pd.DataFrame(player_calculations_list)
     return df_player_calculations

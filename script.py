@@ -2,6 +2,7 @@ import pandas as pd
 from DotaApi import api_handler
 from DotaApi import calculations
 from DotaApi import database_handler
+from DotaApi import winrate
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
@@ -13,18 +14,20 @@ import matplotlib.pyplot as plt
 
 pd.options.display.max_columns = None
 pd.options.display.max_colwidth = None #for some reason pandas truncates df.to_string() if colwidth has a cap
+#pd.set_option("display.width", 0)  # THIS ALLOWS ALL COLUMNS TO BE DISPLAYED, WITHOUT COLUMNS WILL BE "/" AND NEW LINED
+
 
 #VARIABLES
 
 steam_id = 171262902 #watson
-steam_id = 405788540
+#steam_id = 405788540
 
 position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 5 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 25 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
@@ -95,12 +98,13 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
 
     # Constructon of calculated dataframes
     df_calculated = calculations.adding_columns(df_raw, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position) #this function turns df_raw into df_calculated
-    print(df_calculated)
-    print("----------------")
+    ###print(df_calculated)
+    ###print("----------------")
 
-    df_player_calculations = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position)
+    winrate_dict = winrate.create_df_winrate(df_raw)
+
+    df_player_calculations = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position, winrate_dict)
     print(df_player_calculations)
-    print(type(df_player_calculations))
 
     # Database interfacing functions
     database_handler.table_player_calculations(df_player_calculations)

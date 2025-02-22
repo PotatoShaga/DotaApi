@@ -133,7 +133,7 @@ def queries_to_batches_main(steam_id, position="POSITION_1", skip_interval=10, n
         except Exception as error:
             ###print("API GAVE UP")
             ###print(f"Error:{error}")
-            ####print(f"Current Increment: {skip}")
+            print(f"Bad Batch at Current Increment: {skip}")
             pass
 
     for batch in responses_batch:

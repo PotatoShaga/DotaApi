@@ -76,7 +76,7 @@ def winrate_query(df_winrate, oldest_match_id, number_of_matches):
 
 def convert_df_to_dict(df_winrate):
     keylist = ["WR1", "WR2", "WR3", "WR4", "WR5", "WR6", "WR7", "WR8", "WR9", "WR10"]
-    winrate_dict = {(key[2:]):round(df_winrate.mean()[key],5) for key in keylist} # key is pos, value is winrate of that pos
+    winrate_dict = {int((key[2:])):round(df_winrate.mean()[key],5) for key in keylist} # key is pos, value is winrate of that pos
     return winrate_dict
 
 def create_df_winrate(df_raw):

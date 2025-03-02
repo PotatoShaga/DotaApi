@@ -104,13 +104,13 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     winrate_dict = winrate.create_df_winrate(df_raw)
     #print(winrate_dict) # more important info is printing the df_isVictory in winrate.py
 
-    df_player_calculations = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position, winrate_dict)
+    df_player_calculations, parameters_dict = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position, winrate_dict)
     print(df_player_calculations)
 
     df_player_calculations.to_excel("output.xlsx", sheet_name="Sheet1", index=False)
 
     # Database interfacing functions
-    database_handler.table_player_calculations(df_player_calculations)
+    database_handler.table_player_calculations(df_player_calculations, parameters_dict)
     
     # Creates plots 
     dict_of_plts = calculations.player_graphs(df_calculated, position) #changes paramaters to get different members of your team ("POSITION_2", isOnMyTeam=False for enemy mid)

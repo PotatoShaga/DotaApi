@@ -20,10 +20,9 @@ def table_player_calculations(df_player_calculations, parameters_dict): #inserts
         for i, value in df_player_calculations[column].items(): # iterates over each item in the column
             flat_dict[f"{column}_{i}"] = value
     flat_df = pd.DataFrame([flat_dict])
-    print(flat_df)
 
     
-    flat_df.to_sql(table_name, sqlite_connection, if_exists="replace",index=False,index_label="{steam_id}")
+    flat_df.to_sql(table_name, sqlite_connection, if_exists="append",index=False,index_label="steam_id")
 
     cursor.close()
     sqlite_connection.commit()

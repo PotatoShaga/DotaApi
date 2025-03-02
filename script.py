@@ -27,7 +27,7 @@ isOnMyTeam = True #this is only used in player_graphs and worksheet string. by d
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 15 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately

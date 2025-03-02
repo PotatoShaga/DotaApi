@@ -11,7 +11,7 @@ def grab_steam_ids(df_raw):
     columnlabels=["ID1","WR1","ID2","WR2","ID3","WR3","ID4","WR4","ID5","WR5","ID6","WR6","ID7","WR7","ID8","WR8","ID9","WR9","ID10","WR10"]
     df_winrate = pd.DataFrame(columns=columnlabels)
 
-    for indices, match_id in enumerate(df_raw["id"].unique()): #agnostically gets raw data for everyone (except in winrate). more specific specification happens in player_calculations
+    for indices, match_id in enumerate(df_raw["id"].unique()): 
         for label in columnlabels[0::2]:
             positionnumber = int(label[2:]) # gets everything except last 2 chars (so will get 1 and 10 fine)
             isOnMyTeam = True
@@ -27,11 +27,12 @@ def grab_steam_ids(df_raw):
 def grab_winrates(df_winrate, oldest_match_id, number_of_matches):
     response_json_batch = winrate_query(df_winrate, oldest_match_id, number_of_matches)
     for index, batch in enumerate(response_json_batch): # each batch should be the winlosses of 10 players for a match id
-        df_isVictory_placeholder = pd.DataFrame([ #this placeholder df contains rows of key ("WR_x") and the bool of isVictory, its long format
+        df_isVictory_placeholder = pd.DataFrame([ #this placeholder df contains rows of key ("WR_x") and the bool of isVictory, its in long format
         {"key": key, "isVictory": match["players"][0]["isVictory"]}
         for key, value in batch.items()
         for match in value["matches"]])
-
+        #print(df_isVictory_placeholder)
+        #print(oldest_match_id)
         winrates = df_isVictory_placeholder.groupby("key")["isVictory"].mean()
         for col in winrates.keys():
             df_winrate.loc[index, col] = winrates[col]

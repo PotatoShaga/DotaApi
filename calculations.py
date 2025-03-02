@@ -179,17 +179,17 @@ def player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_m
 
     def average_of_each_players_stat(df_calculated, stat_label, dict_key, mode="Append"): #this takes the average of each of the 10 unique players stats` and gives it back in a dict 1-10 listed in order of your team then their team
         average_dict = {}
-        average_dict[1] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_1") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5)  #gets all your pos and team row, gets all these rows at [stat_label], means and rounds to dict[key:1]
-        average_dict[2] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_2") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5) 
-        average_dict[3] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_3") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5) 
-        average_dict[4] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_4") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5) 
-        average_dict[5] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_5") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5) 
+        average_dict[1] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_1") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5))  #gets all your pos and team row, gets all these rows at [stat_label], means and rounds to dict[key:1]
+        average_dict[2] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_2") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5)) 
+        average_dict[3] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_3") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5)) 
+        average_dict[4] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_4") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5)) 
+        average_dict[5] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_5") & (df_calculated["isOnMyTeam"] == True)][stat_label]).mean(),5)) 
 
-        average_dict[6] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_1") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
-        average_dict[7] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_2") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
-        average_dict[8] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_3") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
-        average_dict[9] = round((df_calculated.loc[(df_calculated["position"] == "POSITION_4") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
-        average_dict[10]= round((df_calculated.loc[(df_calculated["position"] == "POSITION_5") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5) 
+        average_dict[6] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_1") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5)) 
+        average_dict[7] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_2") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5)) 
+        average_dict[8] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_3") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5)) 
+        average_dict[9] = int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_4") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5)) 
+        average_dict[10]= int(round((df_calculated.loc[(df_calculated["position"] == "POSITION_5") & (df_calculated["isOnMyTeam"] == False)][stat_label]).mean(),5)) 
         #Bruh do vectorisation with mean(axis=0)? the numpy or pandas way
         if mode == "Append": #by default will append value to the output dict with key:value
             player_calculations_list[0][dict_key] = average_dict

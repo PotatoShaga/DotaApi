@@ -1,11 +1,11 @@
+from dotenv import load_dotenv
+
+load_dotenv()
 import requests
 import pandas as pd
 import time
 import sys
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 #This file contains the functions which sends the GraphQL query to stratz, and rate limiting/pagination

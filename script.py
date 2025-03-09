@@ -1,14 +1,20 @@
-import pandas as pd
-from DotaApi import api_handler
-from DotaApi import calculations
-from DotaApi import database_handler
-from DotaApi import winrate
+from DotaApi import initialize_connections
+initialize_connections.initialize_engine()
+# MYSQL QUERY: i literally have no clue but it doesnt run here unless its at the very top. what the fuckity fuck fucking hell
+# So this intializes a connection and some fucking how it works.
+
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
 import matplotlib 
-matplotlib.use('Agg')
+matplotlib.use('Agg')   
+import pandas as pd
 import matplotlib.pyplot as plt
+from DotaApi import database_handler
+from DotaApi import api_handler
+from DotaApi import calculations
+from DotaApi import database_handler
+from DotaApi import winrate
 
 #This file imports all the functions from the other files and uses it's own excelsheet creator function to output the master.xlsx excel sheet
 
@@ -27,7 +33,7 @@ isOnMyTeam = True #this is only used in player_graphs and worksheet string. by d
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 5 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 15 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 def make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam=True): #just for ease of use, so i dont have to call every one seperately
@@ -124,3 +130,5 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
 
 if __name__ == "__main__":
     main_script(steam_id, position, isOnMyTeam, minute, skip_interval, number_of_matches_to_parse)
+
+

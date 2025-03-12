@@ -1,5 +1,6 @@
 # DotaApi
-![image](https://github.com/user-attachments/assets/765ad518-f753-44ce-bcac-95bb2ff7eae3)
+![image](https://github.com/user-attachments/assets/1641a688-4fad-40e6-9c59-5c7b0ee6b919)
+
 
 This python program takes in your steam_id and position to request a query to StratzApi. Processing the data from the query, it provides a statistical overview (data + graph) of your relative networth, cs/denies, level, and kda at a selected minute. This program can be run from the terminal, or run from a website locally. FOR BOTH you need to add a .env file to the DotaApi folder so that it contains 
 

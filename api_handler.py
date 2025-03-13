@@ -131,8 +131,8 @@ def queries_to_batches_main(steam_id, position="POSITION_1", skip_interval=10, n
             responses_batch.append(query_data)
             print(f"Current Increment: {skip}")
         except Exception as error:
-            ###print("API GAVE UP")
-            ###print(f"Error:{error}")
+            print("API GAVE UP")
+            print(f"Error:{error}")
             print(f"Bad Batch at Current Increment: {skip}")
             pass
 

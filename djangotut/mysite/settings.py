@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "DotaApp.apps.DotaAppConfig",
+    "DotaApp.apps.DotaAppConfig", # recognises application in apps.py
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

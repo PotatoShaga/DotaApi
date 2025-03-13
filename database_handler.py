@@ -9,7 +9,7 @@ import mysql.connector
 import mysql
 from mysql.connector import Error
 
-#This file hosts the functions which interact with the SQLite database
+#This file hosts the functions which interact with the MySQL database
 
 def table_player_calculations_staging(df_player_calculations, parameters_dict,engine): #inserts or updates the data inside player_calculations 
     table_name = "player_calculations"
@@ -28,7 +28,7 @@ def join_tables(flat_df, engine):
     table_name = "player_calculations"
     table_name_staging = "player_calculations_staging"
     with engine.connect() as conn:
-        columns = ", ".join(flat_df.columns) # insert or replace the two tables
+        columns = ", ".join(flat_df.columns) # generates columnslabel list to successively add data into
         
         table_join_query = f"""
             REPLACE INTO {table_name} ({columns})
@@ -38,5 +38,3 @@ def join_tables(flat_df, engine):
         conn.commit()
         conn.close()
         print("Staging table join succesful")
-    
-### THOUGHTS: WILL I REALLY NEED ALL THE COLUMNS? LIKE LASTHIT_4 (MY POS4 CS), LIKE CMON ITS MROE IMPORTAMT TO SET UP WORKING SQL. MAYBE JUST MANUAALY ADD MOST IMPORTANT COLUMNS?

@@ -6,6 +6,7 @@ from DotaApi import api_handler
 
 pd.set_option("display.max_columns", None)
 
+# Generates winrate data. Requires sending additional queries to StratzApi to gather allied and enemy winrate stats.
 
 def grab_steam_ids(df_raw):
     columnlabels=["ID1","WR1","ID2","WR2","ID3","WR3","ID4","WR4","ID5","WR5","ID6","WR6","ID7","WR7","ID8","WR8","ID9","WR9","ID10","WR10"]

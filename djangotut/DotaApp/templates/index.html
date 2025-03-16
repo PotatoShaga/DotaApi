@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>myteamsucks</title>
+        <title>Player Statistics</title>
         <style>
             .stats-table {
                 border-collapse: collapse;
@@ -16,7 +16,7 @@
                 background-color: #f2f2f2;
             }
             .highlight-you {
-                background-color: #7bc57e;
+                background-color: #e6ffe6;
             }
         </style>
     </head>
@@ -37,16 +37,6 @@
 
             <button type="submit">Submit</button>
         </form>
-
-        {% if parameters %}
-        <div class="parameters">
-            <h2>Player Parameters</h2>
-            <p>SteamID: {{ parameters.steam_id }}</p>
-            <p>Position: {{ parameters.position }}</p>
-            <p>Minute: {{ parameters.minute }}</p>
-            <p>Matches: {{ parameters.number_of_matches_to_parse }}</p>
-        </div>
-        {% endif %}
 
         {% if players %}  <!-- Only show table when players (the context dict) exists -->
         <h2>Player Statistics</h2>

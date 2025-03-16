@@ -1,9 +1,0 @@
-services:
-  web:
-    build: .
-    env_file: .env  # Path relative to docker-compose.yml
-    environment:
-      - PYTHONPATH=/DotaApi  # Match Dockerfile's PYTHONPATH
-    ports:
-      - "8000:8000"
-      

@@ -28,7 +28,7 @@ pd.options.display.max_colwidth = None #for some reason pandas truncates df.to_s
 steam_id = 171262902 #watson
 steam_id = 405788540
 
-position = "POSITION_1"
+position = "POSITION_3"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
@@ -112,9 +112,10 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     #print(winrate_dict) # more important info is printing the df_isVictory in winrate.py
 
     df_player_calculations, parameters_dict = calculations.player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_matches_to_parse, position, winrate_dict)
+    print(parameters_dict)
     print(df_player_calculations)
 
-    df_player_calculations.to_excel("output.xlsx", sheet_name="Sheet1", index=False)
+    #df_player_calculations.to_excel("output.xlsx", sheet_name="Sheet1", index=False)
 
     # Database interfacing functions
     flat_df = database_handler.table_player_calculations_staging(df_player_calculations, parameters_dict, engine)
@@ -125,9 +126,9 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
     # Creates excel sheet
-    file_path = "master.xlsx"
-    make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam)
-    return file_path
+    #make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam
+
+    return df_player_calculations, parameters_dict
 
 
 if __name__ == "__main__":

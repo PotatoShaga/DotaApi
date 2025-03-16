@@ -1,28 +1,79 @@
-<form method="GET">
-    {% csrf_token %}
-    <label for="steam_id">steam_id:</label>
-    <input type="text" id="steam_id" name="steam_id" placeholder="enter 9 digit steam_id" required><br>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>myteamsucks</title>
+        <style>
+            .stats-table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            .stats-table th, .stats-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            .stats-table tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+            .highlight-you {
+                background-color: #7bc57e;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Player Comparison</h2>
+        <form method="GET">
+            <label for="steam_id">steam_id:</label>
+            <input type="text" id="steam_id" name="steam_id" placeholder="enter 9 digit steam_id" required><br>
 
-    <label for="position">position:</label>
-    <input type="text" id="position" name="position" placeholder="1, 2, 3, 4, or 5" required><br>
+            <label for="position">position:</label>
+            <input type="number" id="position" name="position" placeholder="1-5" min="1" max="5" required><br>
 
-    <label for="isOnMyTeam">isOnMyTeam:</label>
-    <input type="text" id="isOnMyTeam" name="isOnMyTeam" placeholder="True or False" required><br>
+            <label for="minute">minute:</label>
+            <input type="number" id="minute" name="minute" value="10" required><br>
 
-    <label for="minute">minute:</label>
-    <input type="text" id="minute" name="minute" placeholder="default: 11 (minute 10)" required><br>
+            <label for="num_matches">num_matches:</label>
+            <input type="number" id="num_matches" name="num_matches" min="1" max="100" required><br>
 
-    <label for="skip_interval">skip_interval:</label>
-    <input type="text" id="skip_interval" name="skip_interval" placeholder="default: 10" required><br>
+            <button type="submit">Submit</button>
+        </form>
 
-    <label for="num_matches">num_matches:</label>
-    <input type="text" id="num_matches" name="num_matches" placeholder="number of matches to parse" required><br>
+        {% if parameters %}
+        <div class="parameters">
+            <h2>Player Parameters</h2>
+            <p>SteamID: {{ parameters.steam_id }}</p>
+            <p>Position: {{ parameters.position }}</p>
+            <p>Minute: {{ parameters.minute }}</p>
+            <p>Matches: {{ parameters.number_of_matches_to_parse }}</p>
+        </div>
+        {% endif %}
 
-    <button type="submit">Submit</button>
-</form>
-
-{% if excelsheet %}
-    <a href="?steam_id={{ steam_id }}&download=true">
-        <button type="button">Download Excel Sheet</button>
-    </a>
-{% endif %}
+        {% if players %}  <!-- Only show table when players (the context dict) exists -->
+        <h2>Player Statistics</h2>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Name</th> <!--Where the actual column names are-->
+                    <th>Winrate</th>  
+                    <th>Last Hits</th>
+                    <th>Denies</th>
+                    <th>Level</th>
+                    <th>KD</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr {% if player.Name == "You" %}class="highlight-you"{% endif %}>
+                    <td>{{ player.Name }}</td>
+                    <td>{{ player.winrate|floatformat:2 }}%</td>
+                    <td>{{ player.lastHitsAverage|floatformat:2 }}</td>
+                    <td>{{ player.deniesAverage|floatformat:1 }}</td>
+                    <td>{{ player.levelAverage|floatformat:1 }}</td>
+                    <td>{{ player.kdaAverage }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </body>
+</html>

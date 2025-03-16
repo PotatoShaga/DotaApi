@@ -206,7 +206,7 @@ def player_calculations(df_calculated, steam_id, minute, isOnMyTeam, number_of_m
     def quick_kda_zip():
         kills_dict = average_of_each_players_stat(df_calculated,"kills","kdaAverage", mode="Value")
         deaths_dict = average_of_each_players_stat(df_calculated,"deaths","kdaAverage", mode="Value")
-        kda_dict = {key: f"{kills_dict[key]}/{deaths_dict[key]}" for key in kills_dict}
+        kda_dict = {key: f"{round(kills_dict[key],2)} / {round(deaths_dict[key],2)}" for key in kills_dict}
         player_calculations_dict["kdaAverage"] = kda_dict
 
     quick_kda_zip()

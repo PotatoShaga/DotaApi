@@ -2,7 +2,9 @@
 ![image](https://github.com/user-attachments/assets/e9749430-061f-4389-bc39-31612ebec1d5)
 ![image](https://github.com/user-attachments/assets/be4f25a5-32a9-499c-8da7-d2715e422e89)
 
-Given input parameters of your steamid, position, minute, and number of matches to parse, this program analyzes the data to return and visualize trends for 6 unique categories, with each containing 10 datapoints (1 for every player in the game). This is achieved by sending GraphQL queries to StratzApi, processing the data in pandas DataFrame, and then graphing the change in time of these stats with Matplotlib. The 6 unique categories are your winrates, networthDifferences, total CS, total denies, level, and kda. These stats are all taken at the specified minute snapshot. 
+This tool quantitatively analyzes a player’s Dota 2 laning performance by performing data analysis on their recent matches. 
+
+Given input parameters of your steamID, position, minute, and the number of matches to parse, this program analyzes the data to return and visualize trends for 6 unique categories, with each containing 10 datapoints (1 for every player in the game). This is achieved by sending GraphQL queries to StratzApi, processing the data in pandas DataFrame, and then graphing the change in time of these stats with Matplotlib. The 6 unique categories are your winrates, networthDifferences, total CS, total denies, level, and kda. These stats are all taken at the specified minute snapshot. 
 
 This program also uses basic SQL queries to store each player's preformance analysis as a 65 column row in a MySQL database. This program can be run from the terminal, or run as a locally deployed website with django. For both you need to add a .env file to the DotaApi folder so that it contains 
 

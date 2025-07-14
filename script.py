@@ -28,12 +28,12 @@ pd.options.display.max_colwidth = None #for some reason pandas truncates df.to_s
 steam_id = 171262902 #watson
 steam_id = 405788540
 
-position = "POSITION_3"
+position = "POSITION_1"
 isOnMyTeam = True #this is only used in player_graphs and worksheet string. by default its true for player_graphs
 "========================================================"
 minute = 11 #MINUTE 11 BY DEFAULT. minute 11 is exactly 10:01
 skip_interval = 25
-number_of_matches_to_parse = 2 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
+number_of_matches_to_parse = 10 #accepts numbers 0-{skip_interval}, for numbers above it needs to be intervals of {skip_interval}
 "========================================================"
 
 # Hard coded excel sheet generator. Goal is to move this into Django website.
@@ -126,7 +126,7 @@ def main_script(steam_id=171262902, position="POSITION_1", isOnMyTeam=True, minu
     print(f"Number of matches parsed: {(df_calculated.shape[0])/10}")
 
     # Creates excel sheet
-    #make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam
+    make_all_excel_sheets(df_raw, df_player_calculations, dict_of_plts, steam_id, position, minute, number_of_matches_to_parse, isOnMyTeam)
 
     return df_player_calculations, parameters_dict
 

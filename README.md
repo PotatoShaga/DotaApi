@@ -1,17 +1,24 @@
 # DotaApi
-![image](https://github.com/user-attachments/assets/1641a688-4fad-40e6-9c59-5c7b0ee6b919)
+![image](https://github.com/user-attachments/assets/e9749430-061f-4389-bc39-31612ebec1d5)
+![image](https://github.com/user-attachments/assets/be4f25a5-32a9-499c-8da7-d2715e422e89)
 
+This tool quantitatively analyzes a player’s Dota 2 laning performance by performing data analysis on their recent matches. 
 
-This python program takes in your steam_id and position to request a query to StratzApi. Processing the data from the query, it provides a statistical overview (data + graph) of your relative networth, cs/denies, level, and kda at a selected minute. This program can be run from the terminal, or run from a website locally. FOR BOTH you need to add a .env file to the DotaApi folder so that it contains 
+Given input parameters of your steamID, position, minute, and the number of matches to parse, this program analyzes the data to return and visualize trends for 6 unique categories, with each containing 10 datapoints (1 for every player in the game). This is achieved by sending GraphQL queries to StratzApi, processing the data in pandas DataFrame, and then graphing the change in time of these stats with Matplotlib. The 6 unique categories are your winrates, networthDifferences, total CS, total denies, level, and kda. These stats are all taken at the specified minute snapshot. 
+
+This program uses basic SQL queries to store each player's preformance analysis as a 65 column row in a MySQL database. 
+
+As well, this program can be run from the terminal or as a locally deployed website with django. For both you need to add a .env file to the DotaApi folder so that it contains 
 
 TOKEN = {stratz_api_token} 
 
 which is provided at https://stratz.com/api. 
 
-The data processing uses mostly Pandas' dataframes, the data is given in the form of an excelsheet, the graphs were made with Matplotlib, and the website was created with Django. 
+The MySQL connections also require a password for a useraccount in .env, which currently I've only created for myself, so you will need to disable the MySQL functions. 
+
 
 # Running the website locally
-Make sure you have the .env file. Change your current directory to DotaApi/djangotut, and type into the console python manage.py runserver. Then ctrl-click the local address to open it. The unneeded excel files (pngs, raw _data exceel sheet) are stored inside djangotut. 
+Make sure you have the .env file. Change your current directory to DotaApi/djangotut, and type into the console python manage.py runserver. Then ctrl-click the local address to open it. The extra files (pngs, raw _data excel sheet) are stored inside djangotut. 
 
 # netWorthDifference
 For networthDifference, the stats are ordered by comparing the respective positions to themselves for index 1-5. Index 6-10 are comparing positions to their lane opposition. It follows the table below:  

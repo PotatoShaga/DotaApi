@@ -24,6 +24,7 @@ pd.options.display.max_colwidth = None #for some reason pandas truncates df.to_s
 
 
 #VARIABLES
+#example comment
 
 steam_id = 171262902 #watson
 steam_id = 405788540
